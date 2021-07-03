@@ -1,0 +1,3 @@
+[submodule "include/engine"]
+	path = include/engine
+	url = git@github.com:yuydev-ru/engine.git
