@@ -20,7 +20,7 @@ struct Sprite : Component
 };
 struct Camera : Component
 {
-
+    sf::Vector2f scale = {1, 1};
 };
 struct Player : Component {};
 
@@ -30,6 +30,7 @@ struct Player : Component {};
 void
 render(GameState *state, Storage *storage, const Entity id)
 {
+    auto camera = storage->getComponent<Camera>(state->currentCamera);
     auto camTransform = storage->getComponent<Transform>(state->currentCamera);
     auto camPos = camTransform->position;
 
@@ -48,8 +49,22 @@ render(GameState *state, Storage *storage, const Entity id)
         spr->loaded = true;
     }
 
-    spr->sprite.setPosition(t->position);
-    spr->sprite.setScale(t->scale);
+    sf::Vector2f screenPos = { (t->position.x - camPos.x) * camera->scale.x
+                             , (camPos.y - t->position.y) * camera->scale.y };
+
+    screenPos += (sf::Vector2f) state->window->getSize() * 0.5f;
+
+    auto spriteSize = (sf::Vector2f) spr->texture.getSize();
+    spriteSize.x *= t->scale.x * camera->scale.x;
+    spriteSize.y *= t->scale.y * camera->scale.y;
+    screenPos -= spriteSize * 0.5f;
+
+    auto screenScale = t->scale;
+    screenScale.x *= camera->scale.x;
+    screenScale.y *= camera->scale.y;
+
+    spr->sprite.setPosition(screenPos);
+    spr->sprite.setScale(screenScale);
     state->window->draw(spr->sprite);
 }
 
@@ -105,6 +120,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
 
     Entity camera = storage->createEntity();
     storage->addComponent<Transform>(camera);
-    storage->addComponent<Camera>(camera);
+    auto cam = storage->addComponent<Camera>(camera);
+    cam->scale = {1, 1};
     state->currentCamera = camera;
 }
