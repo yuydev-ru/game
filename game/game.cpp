@@ -7,15 +7,9 @@
 
 struct Transform : Component
 {
-    int x;
-    int y;
+    sf::Vector2f position = {0, 0};
 };
-struct PlayerController : Component
-{
-    std::string name;
-};
-struct Collider : Component {};
-struct EnemyController : Component {};
+struct Player : Component {};
 
 /* Systems */
 
@@ -23,16 +17,23 @@ void
 movePlayer(GameState *state, Storage *storage, const Entity id)
 {
     auto t = storage->getComponent<Transform>(id);
-    auto p = storage->getComponent<PlayerController>(id);
 
-    std::cout << "Moving player " << p->name << " from "
-              << "(" << t->x << "; " << t->y << ")";
-
-    t->x *= 21;
-    t->y *= 13;
-
-    std::cout << " to (" << t->x << "; " << t->y << ")" << std::endl;
-    state->running = false;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    {
+        t->position.y += 0.1f;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+    {
+        t->position.y -= 0.1f;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    {
+        t->position.x -= 0.1f;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    {
+        t->position.x += 0.1f;
+    }
 }
 
 /* ******* */
@@ -42,13 +43,9 @@ void
 initializeEngine(GameState *state, Storage *storage)
 {
     storage->registerComponent<Transform>();
-    storage->registerComponent<EnemyController>();
-    storage->registerComponent<PlayerController>();
-    storage->registerComponent<Collider>();
+    storage->registerComponent<Player>();
 
-    auto comp = {TYPE(Transform), TYPE(PlayerController)};
-    storage->systemSignature[movePlayer] = storage->createSignature(comp);
-    storage->systemsArray.push_back(movePlayer);
+    storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
 }
 
 // NOTE(guschin): В этой сцене должна загружаться указанная сцена, но
@@ -57,14 +54,6 @@ void
 loadScene(const Config *config, const std::string& sceneName, GameState *state, Storage *storage)
 {
     Entity e1 = storage->createEntity();
-
-    Entity e2 = storage->createEntity();
-    auto t = storage->addComponent<Transform>(e2);
-    auto p = storage->addComponent<PlayerController>(e2);
-    t->x = 1;
-    t->y = 2;
-
-    p->name = "Andrew";
-
-    storage->destroyEntity(e1);
+    storage->addComponent<Transform>(e1);
+    storage->addComponent<Player>(e1);
 }
