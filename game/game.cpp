@@ -42,8 +42,8 @@ render(GameState *state, Storage *storage, const Entity id)
         spr->texture.loadFromImage(spr->image);
         spr->sprite.setTexture(spr->texture);
         sf::IntRect rect = { 0, 0
-                           , (int) spr->image.getSize().x
-                           , (int) spr->image.getSize().y };
+                , (int) spr->image.getSize().x
+                , (int) spr->image.getSize().y };
         spr->sprite.setTextureRect(rect);
         spr->loaded = true;
     }
@@ -51,6 +51,29 @@ render(GameState *state, Storage *storage, const Entity id)
     spr->sprite.setPosition(t->position);
     spr->sprite.setScale(t->scale);
     state->window->draw(spr->sprite);
+}
+
+void
+movePlayer(GameState *state, Storage *storage, const Entity id)
+{
+    auto t = storage->getComponent<Transform>(id);
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    {
+        t->position.y += 0.1f;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+    {
+        t->position.y -= 0.1f;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    {
+        t->position.x -= 0.1f;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    {
+        t->position.x += 0.1f;
+    }
 }
 
 /* ******* */
@@ -65,6 +88,7 @@ initializeEngine(GameState *state, Storage *storage)
     storage->registerComponent<Player>();
 
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
+    storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
 }
 
 // NOTE(guschin): В этой сцене должна загружаться указанная сцена, но
