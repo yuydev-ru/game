@@ -2,6 +2,7 @@
 #include <engine/base.h>
 
 #include <iostream>
+#include <cmath>
 
 /* Components */
 
@@ -22,7 +23,10 @@ struct Camera : Component
 {
     sf::Vector2f scale = {1, 1};
 };
-struct Player : Component {};
+struct Player : Component
+{
+    float speed = 10;
+};
 
 
 /* Systems */
@@ -73,22 +77,17 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
 {
     auto t = storage->getComponent<Transform>(id);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-    {
-        t->position.y += 0.1f;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-    {
-        t->position.y -= 0.1f;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-    {
-        t->position.x -= 0.1f;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-    {
-        t->position.x += 0.1f;
-    }
+    sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
+
+    // Нормализуем верктор move
+    float moveSize = pow(move.x * move.x + move.y * move.y, 0.5f);
+    move.x /= moveSize;
+    move.y /= moveSize;
+
+    move.x *= storage->getComponent<Player>(id)->speed;
+    move.y *= storage->getComponent<Player>(id)->speed;
+
+    t->position += move;
 }
 
 /* ******* */
