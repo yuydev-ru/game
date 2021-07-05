@@ -9,8 +9,10 @@ endif
 CC=g++
 CFLAGS=-Wall -Wpedantic -ggdb -std=c++11
 
-ifeq ($(shell uname), Darwin)
-	override CFLAGS += -arch x86_64
+ifneq ($(OS), Windows_NT)
+	ifeq ($(shell uname), Darwin)
+		override CFLAGS += -arch x86_64
+	endif
 endif
 
 SRC = game/game.cpp
