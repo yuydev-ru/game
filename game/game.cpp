@@ -7,32 +7,50 @@
 
 struct Transform : Component
 {
-    int x;
-    int y;
+    sf::Vector2f position = {0, 0};
+    sf::Vector2f scale = {1, 1};
 };
-struct PlayerController : Component
+struct Sprite : Component
 {
-    std::string name;
+    std::string assetPath;
+    bool loaded = false;
+    sf::Image image;
+    sf::Texture texture;
+    sf::Sprite sprite;
 };
-struct Collider : Component {};
-struct EnemyController : Component {};
+struct Camera : Component
+{
+
+};
+struct Player : Component {};
+
 
 /* Systems */
 
 void
-movePlayer(GameState *state, Storage *storage, const Entity id)
+render(GameState *state, Storage *storage, const Entity id)
 {
+    auto camTransform = storage->getComponent<Transform>(state->currentCamera);
+    auto camPos = camTransform->position;
+
     auto t = storage->getComponent<Transform>(id);
-    auto p = storage->getComponent<PlayerController>(id);
+    auto spr = storage->getComponent<Sprite>(id);
 
-    std::cout << "Moving player " << p->name << " from "
-              << "(" << t->x << "; " << t->y << ")";
+    if (!spr->loaded)
+    {
+        spr->image.loadFromFile(spr->assetPath);
+        spr->texture.loadFromImage(spr->image);
+        spr->sprite.setTexture(spr->texture);
+        sf::IntRect rect = { 0, 0
+                           , (int) spr->image.getSize().x
+                           , (int) spr->image.getSize().y };
+        spr->sprite.setTextureRect(rect);
+        spr->loaded = true;
+    }
 
-    t->x *= 21;
-    t->y *= 13;
-
-    std::cout << " to (" << t->x << "; " << t->y << ")" << std::endl;
-    state->running = false;
+    spr->sprite.setPosition(t->position);
+    spr->sprite.setScale(t->scale);
+    state->window->draw(spr->sprite);
 }
 
 /* ******* */
@@ -42,13 +60,11 @@ void
 initializeEngine(GameState *state, Storage *storage)
 {
     storage->registerComponent<Transform>();
-    storage->registerComponent<EnemyController>();
-    storage->registerComponent<PlayerController>();
-    storage->registerComponent<Collider>();
+    storage->registerComponent<Sprite>();
+    storage->registerComponent<Camera>();
+    storage->registerComponent<Player>();
 
-    auto comp = {TYPE(Transform), TYPE(PlayerController)};
-    storage->systemSignature[movePlayer] = storage->createSignature(comp);
-    storage->systemsArray.push_back(movePlayer);
+    storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
 }
 
 // NOTE(guschin): В этой сцене должна загружаться указанная сцена, но
@@ -57,14 +73,14 @@ void
 loadScene(const Config *config, const std::string& sceneName, GameState *state, Storage *storage)
 {
     Entity e1 = storage->createEntity();
+    auto e1_t = storage->addComponent<Transform>(e1);
+    e1_t->scale = {0.1f, 0.1f};
+    auto spr = storage->addComponent<Sprite>(e1);
+    spr->assetPath = "assets/images/cube.jpg";
+    storage->addComponent<Player>(e1);
 
-    Entity e2 = storage->createEntity();
-    auto t = storage->addComponent<Transform>(e2);
-    auto p = storage->addComponent<PlayerController>(e2);
-    t->x = 1;
-    t->y = 2;
-
-    p->name = "Andrew";
-
-    storage->destroyEntity(e1);
+    Entity camera = storage->createEntity();
+    storage->addComponent<Transform>(camera);
+    storage->addComponent<Camera>(camera);
+    state->currentCamera = camera;
 }

@@ -20,7 +20,7 @@ PACKAGE_DIR = "package"
 
 all: game
 game: engine.o include/engine/interface.h $(SRC)
-	$(CC) $(CFLAGS) -I./$(INCLUDE_DIR) game/game.cpp $(BUILD_DIR)/engine.o -o $(PACKAGE_DIR)/game.exe
+	$(CC) $(CFLAGS) -I./$(INCLUDE_DIR) game/game.cpp $(BUILD_DIR)/engine.o -L./$(LIB_DIR) -lsfml-window -lsfml-graphics -lsfml-system -o $(PACKAGE_DIR)/game.exe
 
 
 engine.o: include/engine/base.h include/engine/base.cpp include/engine/interface.h
