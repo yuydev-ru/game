@@ -1,15 +1,47 @@
 #include <engine/interface.h>
 #include <engine/base.h>
 
-#include <iostream>
+#include <nlohmann/json.hpp>
 
-/* Components */
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+#include <typeindex>
+
+using json = nlohmann::json;
+
+namespace Parsing {
+    static sf::Vector2f
+    parseVector(json &dict, const std::string &key)
+    {
+        auto v = dict.find("position")->get<std::vector<float>>();
+        return { v[0], v[1] };
+    }
+}
+
 
 struct Transform : Component
 {
     sf::Vector2f position = {0, 0};
     sf::Vector2f scale = {1, 1};
+
+    static Component *
+    deserialize(json &dict)
+    {
+        auto t = new Transform;
+
+        t->position = Parsing::parseVector(dict, "position");
+
+        auto scale = dict.find("scale")->get<std::vector<float>>();
+        t->scale = { scale[0], scale[1] };
+
+        return t;
+    }
 };
+
 struct Sprite : Component
 {
     std::string assetPath;
@@ -17,13 +49,40 @@ struct Sprite : Component
     sf::Image image;
     sf::Texture texture;
     sf::Sprite sprite;
+
+    static Component *
+    deserialize(json &dict)
+    {
+        auto s = new Sprite;
+
+        auto assetPath = dict.find("assetPath")->get<std::string>();
+        s->assetPath = assetPath;
+        return s;
+    }
 };
 struct Camera : Component
 {
     sf::Vector2f scale = {1, 1};
-};
-struct Player : Component {};
 
+    static Component *
+    deserialize(json &dict)
+    {
+        auto c = new Camera;
+
+        auto scale = dict.find("scale")->get<std::vector<float>>();
+        c->scale = { scale[0], scale[1] };
+
+        return c;
+    }
+};
+struct Player : Component
+{
+    static Component *
+    deserialize(json &dict)
+    {
+        return new Player;
+    }
+};
 
 /* Systems */
 
@@ -97,13 +156,38 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
 void
 initializeEngine(GameState *state, Storage *storage)
 {
-    storage->registerComponent<Transform>();
-    storage->registerComponent<Sprite>();
-    storage->registerComponent<Camera>();
-    storage->registerComponent<Player>();
+    storage->registerComponent<Transform>("Transform");
+    storage->registerComponent<Sprite>("Sprite");
+    storage->registerComponent<Camera>("Camera");
+    storage->registerComponent<Player>("Player");
 
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
+}
+
+Entity
+loadEntity(json &components, GameState *state, Storage *storage)
+{
+    Entity entity = storage->createEntity();
+
+    for (auto & component : components)
+    {
+        std::string name = component.find("type")->get<std::string>();
+        if (storage->deserializers.find(name) != storage->deserializers.end())
+        {
+            Component *comp = storage->deserializers[name](component);
+            auto type = storage->typeNames.at(name);
+            storage->entities[type][entity] = comp;
+            storage->entitySignatures[entity].set(storage->componentTypes[type]);
+
+            if (name == "Camera")
+            {
+                state->currentCamera = entity;
+            }
+        }
+    }
+
+    return entity;
 }
 
 // NOTE(guschin): В этой сцене должна загружаться указанная сцена, но
@@ -111,16 +195,13 @@ initializeEngine(GameState *state, Storage *storage)
 void
 loadScene(const Config *config, const std::string& sceneName, GameState *state, Storage *storage)
 {
-    Entity e1 = storage->createEntity();
-    auto e1_t = storage->addComponent<Transform>(e1);
-    e1_t->scale = {0.1f, 0.1f};
-    auto spr = storage->addComponent<Sprite>(e1);
-    spr->assetPath = "assets/images/cube.jpg";
-    storage->addComponent<Player>(e1);
+    std::ifstream ifs("assets/foo.json");
+    auto j = json::parse(ifs);
+    ifs.close();
+    auto entities = j.find("entities");
 
-    Entity camera = storage->createEntity();
-    storage->addComponent<Transform>(camera);
-    auto cam = storage->addComponent<Camera>(camera);
-    cam->scale = {1, 1};
-    state->currentCamera = camera;
+    for (auto components : *entities)
+    {
+        loadEntity(components, state, storage);
+    }
 }
