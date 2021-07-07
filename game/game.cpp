@@ -25,7 +25,7 @@ struct Camera : Component
 };
 struct Player : Component
 {
-    float speed = 10;
+    float speed = .5;
 };
 
 
@@ -88,6 +88,8 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
 
     move.x *= storage->getComponent<Player>(id)->speed;
     move.y *= storage->getComponent<Player>(id)->speed;
+
+    std::cout << state->axes["vertical"] << ' ' << move.x << ' ' << move.y << '\n';
 
     t->position += move;
 }
