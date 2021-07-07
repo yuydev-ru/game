@@ -80,9 +80,11 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
 
     // Нормализуем верктор move
-    float moveSize = pow(move.x * move.x + move.y * move.y, 0.5f);
-    move.x /= moveSize;
-    move.y /= moveSize;
+    float length = sqrt((move.x * move.x) + (move.y * move.y));
+    if (length != 0) {
+        move.x /= length;
+        move.y /= length;
+    }
 
     move.x *= storage->getComponent<Player>(id)->speed;
     move.y *= storage->getComponent<Player>(id)->speed;
