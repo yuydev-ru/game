@@ -1,6 +1,7 @@
 #include <engine/interface.h>
 #include <engine/base.h>
 
+#include <set>
 #include <iostream>
 
 /* Components */
@@ -30,6 +31,7 @@ struct Collider : Component
     sf::Vector2f deltaCenter = {0, 0};
     sf::Vector2f leftDownCorner = {0, 0};
     sf::Vector2f rightUpCorner = {0, 0};
+    std::set<Entity> collisionList;
 };
 
 /* Systems */
@@ -45,7 +47,7 @@ render(GameState *state, Storage *storage, const Entity id)
     auto spr = storage->getComponent<Sprite>(id);
 
     sf::Vector2f screenPos = { (t->position.x - camPos.x) * camera->scale.x
-            , (camPos.y - t->position.y) * camera->scale.y };
+                             , (camPos.y - t->position.y) * camera->scale.y };
 
     screenPos += (sf::Vector2f) state->window->getSize() * 0.5f;
 
@@ -81,9 +83,6 @@ updateCollider(GameState *state, Storage *storage, const Entity id)
             // NOTE(Roma) : Вычисление размеров коллайдера относительно центра коллайдера, его длины и ширины
             coll->leftDownCorner = {tPos.x + dc.x - w, tPos.y + dc.y - h};
             coll->rightUpCorner = {tPos.x + dc.x + w, tPos.y + dc.y + h};
-            //std::cout << coll->leftDownCorner.x << "," << coll->leftDownCorner.y << " | " << coll->rightUpCorner.x << ","
-            //<< coll->rightUpCorner.y << std::endl;
-            //std::cout << tPos.x << ";" << tPos.y << std::endl;
         }
     }
 }
@@ -124,15 +123,15 @@ collision (GameState *state, Storage *storage, const Entity id)
         {
             auto lC2 = c2->leftDownCorner;
             auto rC2 = c2->rightUpCorner;
-            if (rC.x < lC2.x || lC.x > rC2.x)
+            if (rC.x < lC2.x || lC.x > rC2.x || rC.y < lC2.y || lC.y > rC2.y)
             {
+                c->collisionList.erase(id2);
+                c2->collisionList.erase(id);
                 continue;
             }
-            if (rC.y < lC2.y || lC.y > rC2.y)
-            {
-                continue;
-            }
-            std::cout << "jopa " << " " << std::endl;
+            c->collisionList.insert(id2);
+            c2->collisionList.insert(id);
+
         }
     }
 }
