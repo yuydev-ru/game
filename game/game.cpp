@@ -34,7 +34,11 @@ struct Collider : Component
     sf::Vector2f leftDownCorner = {0, 0};
     sf::Vector2f rightUpCorner = {0, 0};
     std::set<Entity> collisionList;
+    bool bl = false;
+
 };
+
+struct Door : Component {};
 
 /* Systems */
 
@@ -129,14 +133,37 @@ collision (GameState *state, Storage *storage, const Entity id)
             {
                 c->collisionList.erase(id2);
                 c2->collisionList.erase(id);
+                c2->bl = false;
                 continue;
             }
             c->collisionList.insert(id2);
             c2->collisionList.insert(id);
-
+            c2->bl = true;
         }
     }
 }
+
+void
+interactWithEnemy(GameState *state, Storage *storage, const Entity id)
+{
+    auto coll = storage->getComponent<Collider>(id);
+    if (coll->bl)
+    {
+        std::cout << "Interact with enemy\n";
+    }
+}
+
+void
+interactWithDoor(GameState *state, Storage *storage, const Entity id)
+{
+    auto coll = storage->getComponent<Collider>(id);
+    if (coll->bl)
+    {
+        std::cout << "Interact with door\n";
+    }
+
+}
+
 /* ******* */
 
 // NOTE(guschin): Возможно, эту функцию можно генерировать автоматически.
@@ -147,13 +174,16 @@ initializeEngine(GameState *state, Storage *storage)
     storage->registerComponent<Sprite>();
     storage->registerComponent<Camera>();
     storage->registerComponent<Player>();
+    storage->registerComponent<Enemy>();
+    storage->registerComponent<Door>();
     storage->registerComponent<Collider>();
 
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
     storage->registerSystem(updateCollider, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(collision, {TYPE(Collider), TYPE(Player)});
-
+    storage->registerSystem(interactWithEnemy, {TYPE(Collider), TYPE(Enemy)});
+    storage->registerSystem(interactWithDoor, {TYPE(Collider), TYPE(Door)});
 }
 
 // NOTE(guschin): В этой сцене должна загружаться указанная сцена, но
@@ -168,12 +198,23 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     auto spr = storage->addComponent<Sprite>(e1);
     spr->assetPath = "assets/images/cube.jpg";
 
+    // NOTE(tokarev): Создали структуру новый объект типа Enemy
     Entity e2 = storage->createEntity();
     auto e2_t = storage->addComponent<Transform>(e2);
-    e2_t->scale = {0.15f, 0.15f};
-    auto spr2 = storage->addComponent<Sprite>(e2);
-    spr2->assetPath = "assets/images/cube.jpg";
-    e2_t->position = {130.f, 130.f};
+    e2_t->scale = {0.1f, 0.1f};
+    auto spr1 = storage->addComponent<Sprite>(e2);
+    spr1->assetPath = "assets/images/enemy_cube.jpg";
+    storage->addComponent<Enemy>(e2);
+    e2_t->position = {60, 160};
+
+    Entity e3 = storage->createEntity();
+    auto e3_t = storage->addComponent<Transform>(e3);
+    e3_t->scale = {0.5f, 0.5f};
+    auto spr2 = storage->addComponent<Sprite>(e3);
+    spr2->assetPath = "assets/images/door.jpg";
+    storage->addComponent<Door>(e3);
+    e3_t->position = {80, -150};
+
 
     for (Entity ent_id : storage->usedIds)
     {
@@ -192,6 +233,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     }
     auto c = storage->addComponent<Collider>(e1);
     auto c2 = storage->addComponent<Collider>(e2);
+    auto c3 = storage->addComponent<Collider>(e3);
 
     c->deltaCenter = {-30.0, -30.0};
     c2->deltaCenter = {1.0, 1.0};
@@ -199,6 +241,8 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     c->height = spr->image.getSize().y;
     c2->width = spr2->image.getSize().x;
     c2->height = spr2->image.getSize().y;
+    c3->width = spr2->image.getSize().x;
+    c3->height = spr2->image.getSize().y;
 
     Entity camera = storage->createEntity();
     storage->addComponent<Transform>(camera);
