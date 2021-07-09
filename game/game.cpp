@@ -112,9 +112,9 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
 
     // Нормализуем верктор move
     float length = sqrt((move.x * move.x) + (move.y * move.y));
-    if (length != 0) {
-        move.x /= length;
-        move.y /= length;
+    if (length != 0)
+    {
+        move /= length;
     }
 
     move.x *= storage->getComponent<Player>(id)->speed;
