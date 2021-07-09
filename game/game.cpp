@@ -33,7 +33,11 @@ struct Collider : Component
     sf::Vector2f rightUpCorner = {0, 0};
     std::set<Entity> collisionList;
 };
-
+struct Physics : Component
+{
+    float speed = 0;
+    sf::Vector2f dir = {0, 0};
+};
 /* Systems */
 
 void
@@ -87,26 +91,65 @@ updateCollider(GameState *state, Storage *storage, const Entity id)
     }
 }
 
+// TODO(Roma): Нужно исправить коллизию при перемещении по диагонали
+void
+pushOut(GameState *state, Storage *storage, const Entity id)
+{
+    for (Entity id : storage->usedIds)
+    {
+        auto coll = storage->getComponent<Collider>(id);
+        if (coll != nullptr && coll->collisionList.size() != 0)
+        {
+            for (auto id2 : coll->collisionList)
+            {
+                auto coll2 = storage->getComponent<Collider>(id2);
+                auto t = storage->getComponent<Transform>(id);
+                auto t2 = storage->getComponent<Transform>(id2);
+                sf::Vector2f c = {t->position.x + coll->deltaCenter.x, t->position.y + coll->deltaCenter.y};
+                sf::Vector2f c2 = {t2->position.x + coll2->deltaCenter.x, t2->position.y + coll2->deltaCenter.y};
+                sf::Vector2f dC = {c.x - c2.x, c.y - c2.y};
+                auto p = storage->getComponent<Physics>(id);
+                if (p->dir.x != 0 && p->dir.y != 0)
+                {
+                    t->position.x += p->speed * dC.x;
+                    t->position.y += p->speed * dC.y;
+                }
+                else
+                {
+                    sf::Vector2f pushDir = {p->dir.x * -1, p->dir.y * -1};
+                    t->position.x += p->speed * pushDir.x;
+                    t->position.y += p->speed * pushDir.y;
+                }
+            }
+        }
+    }
+}
+
 void
 movePlayer(GameState *state, Storage *storage, const Entity id)
 {
     auto t = storage->getComponent<Transform>(id);
+    auto p = storage->getComponent<Physics>(id);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        t->position.y += 0.1f;
+        p->dir = {0, 1};
+        t->position.y += p->dir.y * p->speed;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
     {
-        t->position.y -= 0.1f;
+        p->dir = {0, -1};
+        t->position.y += p->dir.y * p->speed;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
-        t->position.x -= 0.1f;
+        p->dir = {-1, 0};
+        t->position.x += p->dir.x * p->speed;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
-        t->position.x += 0.1f;
+        p->dir = {1, 0};
+        t->position.x += p->dir.x * p->speed;
     }
 }
 
@@ -146,11 +189,13 @@ initializeEngine(GameState *state, Storage *storage)
     storage->registerComponent<Camera>();
     storage->registerComponent<Player>();
     storage->registerComponent<Collider>();
+    storage->registerComponent<Physics>();
 
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
     storage->registerSystem(updateCollider, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(collision, {TYPE(Collider), TYPE(Player)});
+    storage->registerSystem(pushOut, {TYPE(Collider), TYPE(Physics), TYPE(Transform)});
 
 }
 
@@ -162,16 +207,20 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     Entity e1 = storage->createEntity();
     auto e1_t = storage->addComponent<Transform>(e1);
     storage->addComponent<Player>(e1);
+    storage->addComponent<Physics>(e1);
     e1_t->scale = {0.1f, 0.1f};
     auto spr = storage->addComponent<Sprite>(e1);
     spr->assetPath = "assets/images/cube.jpg";
+    auto p = storage->getComponent<Physics>(e1);
+    p->speed = 0.1f;
 
     Entity e2 = storage->createEntity();
     auto e2_t = storage->addComponent<Transform>(e2);
-    e2_t->scale = {0.15f, 0.15f};
+    e2_t->scale = {0.55f, 0.1f};
     auto spr2 = storage->addComponent<Sprite>(e2);
+    storage->addComponent<Physics>(e2);
     spr2->assetPath = "assets/images/cube.jpg";
-    e2_t->position = {130.f, 130.f};
+    e2_t->position = {0.f, -240.f};
 
     for (Entity ent_id : storage->usedIds)
     {
@@ -191,8 +240,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     auto c = storage->addComponent<Collider>(e1);
     auto c2 = storage->addComponent<Collider>(e2);
 
-    c->deltaCenter = {-30.0, -30.0};
-    c2->deltaCenter = {1.0, 1.0};
+    c->deltaCenter = {0, 0};
     c->width = spr->image.getSize().x;
     c->height = spr->image.getSize().y;
     c2->width = spr2->image.getSize().x;
