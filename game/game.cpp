@@ -94,8 +94,8 @@ updateCollider(GameState *state, Storage *storage, const Entity id)
             auto tPos = t->position;
             auto tSc = t->scale;
             auto dc = coll->deltaCenter;
-            float w = coll->width * 0.5 * tSc.x;
-            float h = coll->height * 0.5 * tSc.y;
+            float w = coll->width * 0.5f * tSc.x;
+            float h = coll->height * 0.5f * tSc.y;
             // NOTE(Roma) : Вычисление размеров коллайдера относительно центра коллайдера, его длины и ширины
             coll->leftDownCorner = {tPos.x + dc.x - w, tPos.y + dc.y - h};
             coll->rightUpCorner = {tPos.x + dc.x + w, tPos.y + dc.y + h};
@@ -144,7 +144,7 @@ collision (GameState *state, Storage *storage, const Entity id)
             }
             c->collisionList.insert(id2);
             c2->collisionList.insert(id);
-
+            std::cout << "Can't touch this!\n";
         }
     }
 }
@@ -195,8 +195,8 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
             spr->texture.loadFromImage(spr->image);
             spr->sprite.setTexture(spr->texture);
             sf::IntRect rect = { 0, 0
-                    , (int) spr->image.getSize().x
-                    , (int) spr->image.getSize().y };
+                               , (int) spr->image.getSize().x
+                               , (int) spr->image.getSize().y };
             spr->sprite.setTextureRect(rect);
             spr->loaded = true;
         }
@@ -206,10 +206,10 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
 
     c->deltaCenter = {-30.0, -30.0};
     c2->deltaCenter = {1.0, 1.0};
-    c->width = spr->image.getSize().x;
-    c->height = spr->image.getSize().y;
-    c2->width = spr2->image.getSize().x;
-    c2->height = spr2->image.getSize().y;
+    c->width = (float) spr->image.getSize().x;
+    c->height = (float) spr->image.getSize().y;
+    c2->width = (float) spr2->image.getSize().x;
+    c2->height = (float) spr2->image.getSize().y;
 
     Entity camera = storage->createEntity();
     storage->addComponent<Transform>(camera);
