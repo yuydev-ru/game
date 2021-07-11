@@ -2,6 +2,5 @@
 lib
 build
 package
-include/engine
-include/logger
+include
 *.DS_Store
