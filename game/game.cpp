@@ -26,7 +26,7 @@ struct Camera : Component
 };
 struct Player : Component
 {
-    float speed = .5;
+    float speed = 200;
 };
 struct Collider : Component
 {
@@ -131,7 +131,8 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     move.x *= storage->getComponent<Player>(id)->speed;
     move.y *= storage->getComponent<Player>(id)->speed;
 
-    t->position += move;
+    t->position += move * state->deltaTime;
+
 }
 
 void
