@@ -52,6 +52,7 @@ struct Physics : Component
     // NOTE(Roma): Вектор направления движения.
     sf::Vector2f dir = {0, 0};
     sf::Vector2f position = {0, 0};
+    sf::Vector2f activeAxes = {1, 1};
 };
 /* Systems */
 
@@ -89,14 +90,15 @@ render(GameState *state, Storage *storage, const Entity id)
 void
 pushOut(GameState *state, Storage *storage, const Entity id)
 {
-    for(Entity ent_id : storage->usedIds)
+    auto coll = storage->getComponent<Collider>(id);
+    auto p = storage->getComponent<Physics>(id);
+    if (coll != nullptr && !coll->collisionList.empty() && !coll->allowCollision)
     {
-       auto coll = storage->getComponent<Collider>(ent_id);
-        if (coll != nullptr && !coll->collisionList.empty() && !coll->allowCollision)
-        {
-            auto t = storage->getComponent<Transform>(ent_id);
-            t->position += coll->normal * coll->penetration;
-        }
+        auto t = storage->getComponent<Transform>(id);
+        sf::Vector2f move = coll->normal * coll->penetration;
+        move.x *= p->activeAxes.x;
+        move.y *= p->activeAxes.y;
+        t->position += move;
     }
 }
 
@@ -240,7 +242,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     auto e2_t = storage->addComponent<Transform>(e2);
     e2_t->scale = {0.55f, 0.1f};
     auto spr2 = storage->addComponent<Sprite>(e2);
-    storage->addComponent<Physics>(e2);
+    auto p2 =  storage->addComponent<Physics>(e2);
     spr2->assetPath = "assets/images/cube.jpg";
     e2_t->position = {0.f, -240.f};
 
@@ -265,6 +267,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     c->height = (float) spr1->image.getSize().y;
     c2->width = (float) spr2->image.getSize().x;
     c2->height = (float) spr2->image.getSize().y;
+    p2->activeAxes = {0, 0};
 
     Entity camera = storage->createEntity();
     storage->addComponent<Transform>(camera);
