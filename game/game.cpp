@@ -2,8 +2,8 @@
 #include <engine/base.h>
 
 #include <set>
-#include <cmath>
 #include <iostream>
+#include <cmath>
 
 /* Components */
 
@@ -24,7 +24,10 @@ struct Camera : Component
 {
     sf::Vector2f scale = {1, 1};
 };
-struct Player : Component {};
+struct Player : Component
+{
+    float speed = .5;
+};
 struct Collider : Component
 {
     float width = 0;
@@ -115,28 +118,20 @@ void
 movePlayer(GameState *state, Storage *storage, const Entity id)
 {
     auto t = storage->getComponent<Transform>(id);
-    auto p = storage->getComponent<Physics>(id);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
+
+    // Нормализуем верктор move
+    float length = sqrt((move.x * move.x) + (move.y * move.y));
+    if (length != 0)
     {
-        p->dir = {0, 1};
-        t->position.y += p->dir.y * p->speed;
+        move /= length;
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-    {
-        p->dir = {0, -1};
-        t->position.y += p->dir.y * p->speed;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-    {
-        p->dir = {-1, 0};
-        t->position.x += p->dir.x * p->speed;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-    {
-        p->dir = {1, 0};
-        t->position.x += p->dir.x * p->speed;
-    }
+
+    move.x *= storage->getComponent<Player>(id)->speed;
+    move.y *= storage->getComponent<Player>(id)->speed;
+
+    t->position += move;
 }
 
 void
@@ -206,7 +201,6 @@ initializeEngine(GameState *state, Storage *storage)
 
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
-    //storage->registerSystem(updateCollider, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(collision, {TYPE(Collider), TYPE(Player)});
     storage->registerSystem(pushOut, {TYPE(Collider), TYPE(Physics), TYPE(Transform)});
 
@@ -244,8 +238,8 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
             spr->texture.loadFromImage(spr->image);
             spr->sprite.setTexture(spr->texture);
             sf::IntRect rect = { 0, 0
-                    , (int) spr->image.getSize().x
-                    , (int) spr->image.getSize().y };
+                               , (int) spr->image.getSize().x
+                               , (int) spr->image.getSize().y };
             spr->sprite.setTextureRect(rect);
             spr->loaded = true;
         }
