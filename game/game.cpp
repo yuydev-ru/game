@@ -41,12 +41,17 @@ struct Collider : Component
     std::set<Entity> collisionList;
     // NOTE(Roma): Разрешена ли коллизия: если нет, то объекты не смогут пересекаться.
     bool allowCollision = false;
+    // NOTE(Roma): Глубина проникновения одного коллайдера в другой.
+    float penetration = 0;
+    // NOTE(Roma): Направление коллизии.
+    sf::Vector2f normal = {0, 0};
 };
 struct Physics : Component
 {
     float speed = 0;
     // NOTE(Roma): Вектор направления движения.
     sf::Vector2f dir = {0, 0};
+    sf::Vector2f position = {0, 0};
 };
 /* Systems */
 
@@ -80,36 +85,17 @@ render(GameState *state, Storage *storage, const Entity id)
 
 }
 
-// TODO(Roma): Нужно исправить коллизию при перемещении по диагонали
+
 void
 pushOut(GameState *state, Storage *storage, const Entity id)
 {
-    for (Entity ent_id : storage->usedIds)
+    for(Entity ent_id : storage->usedIds)
     {
-        auto coll = storage->getComponent<Collider>(ent_id);
+       auto coll = storage->getComponent<Collider>(ent_id);
         if (coll != nullptr && !coll->collisionList.empty() && !coll->allowCollision)
         {
-            for (auto id2 : coll->collisionList)
-            {
-                auto coll2 = storage->getComponent<Collider>(id2);
-                auto t = storage->getComponent<Transform>(ent_id);
-                auto t2 = storage->getComponent<Transform>(id2);
-                sf::Vector2f c = {t->position.x + coll->deltaCenter.x, t->position.y + coll->deltaCenter.y};
-                sf::Vector2f c2 = {t2->position.x + coll2->deltaCenter.x, t2->position.y + coll2->deltaCenter.y};
-                sf::Vector2f dC = {c.x - c2.x, c.y - c2.y};
-                auto p = storage->getComponent<Physics>(ent_id);
-                if (p->dir.x != 0 && p->dir.y != 0)
-                {
-                        t->position.x += p->speed * dC.x;
-                        t->position.y += p->speed * dC.y;
-                }
-                else
-                {
-                    sf::Vector2f pushDir = {p->dir.x * -1, p->dir.y * -1};
-                    t->position.x += p->speed * pushDir.x;
-                    t->position.y += p->speed * pushDir.y;
-                }
-            }
+            auto t = storage->getComponent<Transform>(ent_id);
+            t->position += coll->normal * coll->penetration;
         }
     }
 }
@@ -138,52 +124,80 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
 void
 collision (GameState *state, Storage *storage, const Entity id)
 {
-    // NOTE(Roma): У первого объекта берутся коллайдер и трансформ для обновления координат углов коллайдера
     auto c = storage->getComponent<Collider>(id);
     auto t = storage->getComponent<Transform>(id);
     auto tPos = t->position;
     auto tSc = t->scale;
-    auto dc = c->deltaCenter;
+    auto dC = c->deltaCenter;
     float w = c->width * 0.5f * tSc.x;
     float h = c->height * 0.5f * tSc.y;
-    // NOTE(Roma): К центру объекта прибавляется разница между ним и центром коллайдера, чтобы вычислить координаты
-    // последнего. Затем прибавляется или убавляется половина длины и ширины коллайдера с учётом масштаба,
-    // чтобы вычислить левый нижний или правый верхний уголы.
-    c->leftDownCorner = {tPos.x + dc.x - w, tPos.y + dc.y - h};
-    c->rightUpCorner = {tPos.x + dc.x + w, tPos.y + dc.y + h};
-    auto lC = c->leftDownCorner;
-    auto rC = c->rightUpCorner;
 
     for (Entity id2 : storage->usedIds)
     {
-        // NOTE(Roma): Берётся коллайдер другого объекта, и если он есть и этот объект не совпадает с текущим,
+        // NOTE(Roma): Берётся коллайдер другого объекта, и если он есть и этот объект не совпадает с текущим.
         auto c2 = storage->getComponent<Collider>(id2);
         if (c2 != nullptr && id2 != id)
         {
-            // то обновляем координаты углов его коллайдера
             auto t2 = storage->getComponent<Transform>(id2);
             auto tPos2 = t2->position;
             auto tSc2 = t2->scale;
-            auto dc2 = c2->deltaCenter;
+            auto dC2 = c2->deltaCenter;
             float w2 = c2->width * 0.5f * tSc2.x;
             float h2 = c2->height * 0.5f * tSc2.y;
-            c2->leftDownCorner = {tPos2.x + dc2.x - w2, tPos2.y + dc2.y - h2};
-            c2->rightUpCorner = {tPos2.x + dc2.x + w2, tPos2.y + dc2.y + h2};
-            auto lC2 = c2->leftDownCorner;
-            auto rC2 = c2->rightUpCorner;
-            // NOTE(Roma): и проверяем по углам, не пересекаются ли они.
-            if (rC.x < lC2.x || lC.x > rC2.x || rC.y < lC2.y || lC.y > rC2.y)
+
+            sf::Vector2f betweenCenters = {tPos.x + dC.x - tPos2.x - dC2.x, tPos.y + dC.y - tPos2.y - dC2.y};
+            // Степень наложения одного коллайдера на другой по оси Х.
+            float overlapX = w + w2 - (float) fabs(betweenCenters.x);
+
+            if (overlapX > 0)
             {
-                // В случае, когда не пересекаются, нужно удалить в списке пересечений первого объекта
-                // второй объект. Аналогично со списком второго.
-                c->collisionList.erase(id2);
-                c2->collisionList.erase(id);
-                continue;
+                // Степень наложения по оси Y.
+                float overlapY = h + h2 - (float) fabs(betweenCenters.y);
+
+                if (overlapY > 0)
+                {
+                    // Выталкивать нужно в ту сторону, где степень наложения меньше.
+                    if (overlapX < overlapY)
+                    {
+                        if (betweenCenters.x > 0)
+                        {
+                            c->normal = {1, 0 };
+                            c2->normal = {-1, 0 };
+                        }
+                        else
+                        {
+                            c->normal = {-1, 0};
+                            c2->normal = {1, 0};
+                        }
+                        c->penetration = overlapX;
+                        c2->penetration = overlapX;
+                        c->collisionList.insert(id2);
+                        c2->collisionList.insert(id);
+                        continue;
+                    }
+                    else
+                    {
+                        if (betweenCenters.y > 0)
+                        {
+                            c->normal = {0, 1 };
+                            c2->normal = {0, -1 };
+                        }
+                        else
+                        {
+                            c->normal = {0, -1};
+                            c2->normal = {0, 1 };
+                        }
+                        c->penetration = overlapY;
+                        c2->penetration = overlapY;
+                        c->collisionList.insert(id2);
+                        c2->collisionList.insert(id);
+                        continue;
+                    }
+                }
             }
             // Иначе, поскольку они пересекаются, добавляем объекты в списки друг друга.
-            c->collisionList.insert(id2);
-            c2->collisionList.insert(id);
-
+            c->collisionList.erase(id2);
+            c2->collisionList.erase(id);
         }
     }
 }
