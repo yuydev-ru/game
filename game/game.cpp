@@ -19,7 +19,7 @@ namespace Parsing {
     static sf::Vector2f
     parseVector(json &dict, const std::string &key)
     {
-        auto v = dict.find("position")->get<std::vector<float>>();
+        auto v = dict.find(key)->get<std::vector<float>>();
         return { v[0], v[1] };
     }
 }
@@ -80,6 +80,7 @@ struct Camera : Component
 struct Player : Component
 {
     float speed = .5;
+
     static Component *
     deserialize(json &dict)
     {
@@ -94,6 +95,16 @@ struct Collider : Component
     sf::Vector2f leftDownCorner = {0, 0};
     sf::Vector2f rightUpCorner = {0, 0};
     std::set<Entity> collisionList;
+
+    static Component *
+    deserialize(json &dict)
+    {
+        auto c = new Collider;
+        c->deltaCenter = Parsing::parseVector(dict, "deltaCenter");
+        c->width = dict.find("width")->get<int>();
+        c->height = dict.find("height")->get<int>();
+        return c;
+    }
 };
 
 /* Systems */
@@ -213,12 +224,12 @@ collision (GameState *state, Storage *storage, const Entity id)
 void
 initializeEngine(GameState *state, Storage *storage)
 {
-    storage->registerComponent<Collider>();
+
     storage->registerComponent<Transform>("Transform");
     storage->registerComponent<Sprite>("Sprite");
     storage->registerComponent<Camera>("Camera");
     storage->registerComponent<Player>("Player");
-
+    storage->registerComponent<Collider>("Collider");
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
     storage->registerSystem(updateCollider, {TYPE(Transform), TYPE(Sprite)});
@@ -261,12 +272,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     ifs.close();
     auto entities = j.find("entities");
 
-    Entity e1 = storage->createEntity();
-    auto e1_t = storage->addComponent<Transform>(e1);
-    storage->addComponent<Player>(e1);
-    e1_t->scale = {0.1f, 0.1f};
-    auto spr = storage->addComponent<Sprite>(e1);
-    spr->assetPath = "assets/images/cube.jpg";
+
 
     Entity e2 = storage->createEntity();
     auto e2_t = storage->addComponent<Transform>(e2);
@@ -290,6 +296,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
             spr->loaded = true;
         }
     }
+    /*
     auto c = storage->addComponent<Collider>(e1);
     auto c2 = storage->addComponent<Collider>(e2);
 
@@ -299,7 +306,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     c->height = (float) spr->image.getSize().y;
     c2->width = (float) spr2->image.getSize().x;
     c2->height = (float) spr2->image.getSize().y;
-
+*/
     for (auto components : *entities)
     {
         loadEntity(components, state, storage);
