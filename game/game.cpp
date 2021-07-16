@@ -1,7 +1,6 @@
 #include <engine/interface.h>
 #include <engine/base.h>
-
-#include <nlohmann/json.hpp>
+#include <engine/parsing.h>
 
 #include <fstream>
 #include <set>
@@ -9,21 +8,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-
 #include <typeindex>
 #include <cmath>
-
-using json = nlohmann::json;
-
-namespace Parsing {
-    static sf::Vector2f
-    parseVector(json &dict, const std::string &key)
-    {
-        auto v = dict.find(key)->get<std::vector<float>>();
-        return { v[0], v[1] };
-    }
-}
-
 
 struct Transform : Component
 {
@@ -31,14 +17,12 @@ struct Transform : Component
     sf::Vector2f scale = {1, 1};
 
     static Component *
-    deserialize(json &dict)
+    deserialize(Parsing::configFile &dict)
     {
         auto t = new Transform;
 
-        t->position = Parsing::parseVector(dict, "position");
-
-        auto scale = dict.find("scale")->get<std::vector<float>>();
-        t->scale = { scale[0], scale[1] };
+        t->position = Parsing::parseVector2f(dict, "position");
+        t->scale = Parsing::parseVector2f(dict, "scale");
 
         return t;
     }
@@ -53,26 +37,37 @@ struct Sprite : Component
     sf::Sprite sprite;
 
     static Component *
-    deserialize(json &dict)
+    deserialize(Parsing::configFile &dict)
     {
-        auto s = new Sprite;
+        auto spr = new Sprite;
 
-        auto assetPath = dict.find("assetPath")->get<std::string>();
-        s->assetPath = assetPath;
-        return s;
+        spr->assetPath = Parsing::parseElement<std::string>(dict, "assetPath");
+
+        if (spr != nullptr)
+        {
+            spr->image.loadFromFile(spr->assetPath);
+            spr->texture.loadFromImage(spr->image);
+            spr->sprite.setTexture(spr->texture);
+            sf::IntRect rect = { 0, 0
+                    , (int) spr->image.getSize().x
+                    , (int) spr->image.getSize().y };
+            spr->sprite.setTextureRect(rect);
+            spr->loaded = true;
+        }
+        return spr;
     }
+
 };
 struct Camera : Component
 {
     sf::Vector2f scale = {1, 1};
 
     static Component *
-    deserialize(json &dict)
+    deserialize(Parsing::configFile &dict)
     {
         auto c = new Camera;
 
-        auto scale = dict.find("scale")->get<std::vector<float>>();
-        c->scale = { scale[0], scale[1] };
+        c->scale = Parsing::parseVector2f(dict, "scale");
 
         return c;
     }
@@ -82,7 +77,7 @@ struct Player : Component
     float speed = .5;
 
     static Component *
-    deserialize(json &dict)
+    deserialize(Parsing::configFile &dict)
     {
         return new Player;
     }
@@ -97,12 +92,14 @@ struct Collider : Component
     std::set<Entity> collisionList;
 
     static Component *
-    deserialize(json &dict)
+    deserialize(Parsing::configFile &dict)
     {
         auto c = new Collider;
-        c->deltaCenter = Parsing::parseVector(dict, "deltaCenter");
-        c->width = dict.find("width")->get<int>();
-        c->height = dict.find("height")->get<int>();
+
+        c->deltaCenter = Parsing::parseVector2f(dict, "deltaCenter");
+        c->width = Parsing::parseElement<float>(dict, "width");
+        c->height = Parsing::parseElement<float>(dict, "height");
+
         return c;
     }
 };
@@ -238,13 +235,13 @@ initializeEngine(GameState *state, Storage *storage)
 }
 
 Entity
-loadEntity(json &components, GameState *state, Storage *storage)
+loadEntity(Parsing::configFile &components, GameState *state, Storage *storage)
 {
     Entity entity = storage->createEntity();
 
     for (auto & component : components)
     {
-        std::string name = component.find("type")->get<std::string>();
+        std::string name = Parsing::parseElement<std::string>(component, "type");
         if (storage->deserializers.find(name) != storage->deserializers.end())
         {
             Component *comp = storage->deserializers[name](component);
@@ -267,46 +264,9 @@ loadEntity(json &components, GameState *state, Storage *storage)
 void
 loadScene(const Config *config, const std::string& sceneName, GameState *state, Storage *storage)
 {
-    std::ifstream ifs("assets/foo.json");
-    auto j = json::parse(ifs);
-    ifs.close();
-    auto entities = j.find("entities");
+    Parsing::configFile f = Parsing::parseConfigFile(sceneName);
+    auto entities = Parsing::findEntries(f, "entities");
 
-
-
-    Entity e2 = storage->createEntity();
-    auto e2_t = storage->addComponent<Transform>(e2);
-    e2_t->scale = {0.15f, 0.15f};
-    auto spr2 = storage->addComponent<Sprite>(e2);
-    spr2->assetPath = "assets/images/cube.jpg";
-    e2_t->position = {130.f, 130.f};
-
-    for (Entity ent_id : storage->usedIds)
-    {
-        auto spr = storage->getComponent<Sprite>(ent_id);
-        if (spr != nullptr)
-        {
-            spr->image.loadFromFile(spr->assetPath);
-            spr->texture.loadFromImage(spr->image);
-            spr->sprite.setTexture(spr->texture);
-            sf::IntRect rect = { 0, 0
-                               , (int) spr->image.getSize().x
-                               , (int) spr->image.getSize().y };
-            spr->sprite.setTextureRect(rect);
-            spr->loaded = true;
-        }
-    }
-    /*
-    auto c = storage->addComponent<Collider>(e1);
-    auto c2 = storage->addComponent<Collider>(e2);
-
-    c->deltaCenter = {-30.0, -30.0};
-    c2->deltaCenter = {1.0, 1.0};
-    c->width = (float) spr->image.getSize().x;
-    c->height = (float) spr->image.getSize().y;
-    c2->width = (float) spr2->image.getSize().x;
-    c2->height = (float) spr2->image.getSize().y;
-*/
     for (auto components : *entities)
     {
         loadEntity(components, state, storage);
