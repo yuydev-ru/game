@@ -2,12 +2,9 @@
 #include <engine/base.h>
 #include <engine/parsing.h>
 
-#include <fstream>
 #include <set>
 #include <iostream>
 #include <string>
-#include <vector>
-#include <unordered_map>
 #include <typeindex>
 #include <cmath>
 
@@ -232,43 +229,4 @@ initializeEngine(GameState *state, Storage *storage)
     storage->registerSystem(updateCollider, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(collision, {TYPE(Collider), TYPE(Player)});
 
-}
-
-Entity
-loadEntity(Parsing::configFile &components, GameState *state, Storage *storage)
-{
-    Entity entity = storage->createEntity();
-
-    for (auto & component : components)
-    {
-        std::string name = Parsing::parseElement<std::string>(component, "type");
-        if (storage->deserializers.find(name) != storage->deserializers.end())
-        {
-            Component *comp = storage->deserializers[name](component);
-            auto type = storage->typeNames.at(name);
-            storage->entities[type][entity] = comp;
-            storage->entitySignatures[entity].set(storage->componentTypes[type]);
-
-            if (name == "Camera")
-            {
-                state->currentCamera = entity;
-            }
-        }
-    }
-
-    return entity;
-}
-
-// NOTE(guschin): В этой сцене должна загружаться указанная сцена, но
-//  парсинга когфигов пока что нет, поэтому пока что так.
-void
-loadScene(const Config *config, const std::string& sceneName, GameState *state, Storage *storage)
-{
-    Parsing::configFile f = Parsing::parseConfigFile(sceneName);
-    auto entities = Parsing::findEntries(f, "entities");
-
-    for (auto components : *entities)
-    {
-        loadEntity(components, state, storage);
-    }
 }

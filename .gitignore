@@ -1,6 +1,8 @@
 .idea
 lib
 build
-package
+package/*.dll
+package/*.exe
+package/*.out
 include
 *.DS_Store

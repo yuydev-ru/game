@@ -1,0 +1,62 @@
+{
+	"window": [
+		{
+			"width": 480,
+			"height": 480,
+			"title": "Engine"
+		}
+	],
+	"scene": [
+		{
+			"default": "assets/foo.json"
+		}
+	],
+	"input": [
+		{
+			"keys":[
+				{
+					"key": "up",
+					"button":"W"
+				},
+				{
+					"key": "down",
+					"button":"S"
+				},
+				{
+					"key": "left",
+					"button":"A"
+				},
+				{
+					"key": "right",
+					"button":"D"
+				},
+				{
+					"key": "interact",
+					"button":"E"
+				},
+				{
+					"key": "jump",
+					"button":"Space"
+				}
+			],
+			"oppositeKeys":[
+				{
+					"key": "up",
+					"opposite":"down"
+				},
+				{
+					"key": "down",
+					"opposite":"up"
+				},
+				{
+					"key": "right",
+					"opposite":"left"
+				},
+				{
+					"key": "left",
+					"opposite":"right"
+				}
+			]
+		}
+	]
+}
