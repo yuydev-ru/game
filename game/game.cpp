@@ -18,8 +18,8 @@ struct Transform : Component
     {
         auto t = new Transform;
 
-        t->position = Parsing::parseVector2f(dict, "position");
-        t->scale = Parsing::parseVector2f(dict, "scale");
+        t->position = Parsing::parseVector2<float>(dict, "position");
+        t->scale = Parsing::parseVector2<float>(dict, "scale");
 
         return t;
     }
@@ -28,7 +28,6 @@ struct Transform : Component
 struct Sprite : Component
 {
     std::string assetPath;
-    bool loaded = false;
     sf::Image image;
     sf::Texture texture;
     sf::Sprite sprite;
@@ -40,17 +39,14 @@ struct Sprite : Component
 
         spr->assetPath = Parsing::parseElement<std::string>(dict, "assetPath");
 
-        if (spr != nullptr)
-        {
-            spr->image.loadFromFile(spr->assetPath);
-            spr->texture.loadFromImage(spr->image);
-            spr->sprite.setTexture(spr->texture);
-            sf::IntRect rect = { 0, 0
-                    , (int) spr->image.getSize().x
-                    , (int) spr->image.getSize().y };
-            spr->sprite.setTextureRect(rect);
-            spr->loaded = true;
-        }
+        spr->image.loadFromFile(spr->assetPath);
+        spr->texture.loadFromImage(spr->image);
+        spr->sprite.setTexture(spr->texture);
+        sf::IntRect rect = { 0, 0
+                           , (int) spr->image.getSize().x
+                           , (int) spr->image.getSize().y };
+        spr->sprite.setTextureRect(rect);
+
         return spr;
     }
 
@@ -64,7 +60,7 @@ struct Camera : Component
     {
         auto c = new Camera;
 
-        c->scale = Parsing::parseVector2f(dict, "scale");
+        c->scale = Parsing::parseVector2<float>(dict, "scale");
 
         return c;
     }
@@ -93,7 +89,7 @@ struct Collider : Component
     {
         auto c = new Collider;
 
-        c->deltaCenter = Parsing::parseVector2f(dict, "deltaCenter");
+        c->deltaCenter = Parsing::parseVector2<float>(dict, "deltaCenter");
         c->width = Parsing::parseElement<float>(dict, "width");
         c->height = Parsing::parseElement<float>(dict, "height");
 
@@ -112,18 +108,6 @@ render(GameState *state, Storage *storage, const Entity id)
 
     auto t = storage->getComponent<Transform>(id);
     auto spr = storage->getComponent<Sprite>(id);
-
-    if (!spr->loaded)
-    {
-        spr->image.loadFromFile(spr->assetPath);
-        spr->texture.loadFromImage(spr->image);
-        spr->sprite.setTexture(spr->texture);
-        sf::IntRect rect = { 0, 0
-                , (int) spr->image.getSize().x
-                , (int) spr->image.getSize().y };
-        spr->sprite.setTextureRect(rect);
-        spr->loaded = true;
-    }
 
     sf::Vector2f screenPos = { (t->position.x - camPos.x) * camera->scale.x
                              , (camPos.y - t->position.y) * camera->scale.y };
@@ -228,5 +212,4 @@ initializeEngine(GameState *state, Storage *storage)
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
     storage->registerSystem(updateCollider, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(collision, {TYPE(Collider), TYPE(Player)});
-
 }
