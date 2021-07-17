@@ -131,6 +131,18 @@ struct Physics : Component
             resForce += force.second;
         }
     }
+
+    static Component *
+    deserialize(Parsing::configFile &dict)
+    {
+        auto p = new Physics;
+
+        p->mass = Parsing::parseElement<float>(dict, "mass");
+        p->allowGravity = Parsing::parseElement<bool>(dict, "allowGravity");
+        p->activeAxes = Parsing::parseVector2<float>(dict, "activeAxes");
+
+        return p;
+    }
 };
 /* Systems */
 
@@ -330,12 +342,12 @@ collision (GameState *state, Storage *storage, const Entity id)
 void
 initializeEngine(GameState *state, Storage *storage)
 {
-    storage->registerComponent<Transform>();
-    storage->registerComponent<Sprite>();
-    storage->registerComponent<Camera>();
-    storage->registerComponent<Player>();
-    storage->registerComponent<Collider>();
-    storage->registerComponent<Physics>();
+    storage->registerComponent<Transform>("Transform");
+    storage->registerComponent<Sprite>("Sprite");
+    storage->registerComponent<Camera>("Camera");
+    storage->registerComponent<Player>("Player");
+    storage->registerComponent<Collider>("Collider");
+    storage->registerComponent<Physics>("Physics");
 
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
