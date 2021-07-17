@@ -138,7 +138,7 @@ collision (GameState *state, Storage *storage, const Entity id)
             }
             c->collisionList.insert(id2);
             c2->collisionList.insert(id);
-            c2->bl = true;
+//            c2->bl = true;
         }
     }
 }
@@ -147,9 +147,10 @@ void
 interactWithEnemy(GameState *state, Storage *storage, const Entity id)
 {
     auto coll = storage->getComponent<Collider>(id);
-    if (coll->bl)
+    if (coll->collisionList.size() != 0 && !coll->bl)
     {
         std::cout << "Interact with enemy\n";
+        coll->bl = true;
     }
 }
 
@@ -157,9 +158,10 @@ void
 interactWithDoor(GameState *state, Storage *storage, const Entity id)
 {
     auto coll = storage->getComponent<Collider>(id);
-    if (coll->bl)
+    if (coll->collisionList.size() != 0 && !coll->bl)
     {
         std::cout << "Interact with door\n";
+        coll->bl = true;
     }
 
 }
@@ -209,7 +211,7 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
 
     Entity e3 = storage->createEntity();
     auto e3_t = storage->addComponent<Transform>(e3);
-    e3_t->scale = {0.5f, 0.5f};
+    e3_t->scale = {0.3f, 0.3f};
     auto spr2 = storage->addComponent<Sprite>(e3);
     spr2->assetPath = "assets/images/door.jpg";
     storage->addComponent<Door>(e3);
@@ -235,8 +237,8 @@ loadScene(const Config *config, const std::string& sceneName, GameState *state, 
     auto c2 = storage->addComponent<Collider>(e2);
     auto c3 = storage->addComponent<Collider>(e3);
 
-    c->deltaCenter = {-30.0, -30.0};
-    c2->deltaCenter = {1.0, 1.0};
+//    c->deltaCenter = {-30.0, -30.0};
+//    c2->deltaCenter = {1.0, 1.0};
     c->width = spr->image.getSize().x;
     c->height = spr->image.getSize().y;
     c2->width = spr2->image.getSize().x;
