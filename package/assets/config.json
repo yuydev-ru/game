@@ -8,7 +8,7 @@
 	],
 	"scene": [
 		{
-			"default": "assets/foo.json"
+			"default": "assets/scenes/menu.json"
 		}
 	],
 	"input": [

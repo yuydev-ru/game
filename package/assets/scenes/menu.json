@@ -1,0 +1,17 @@
+{
+"currentCamera": "camera",
+"entities": [
+    [
+        {
+            "type": "Transform",
+            "position": [0, 0],
+            "scale": [1, 1]
+        },
+        {
+            "type": "Camera",
+            "tags": ["mainCamera"],
+            "scale": [1, 1]
+        }
+    ]
+]
+}
