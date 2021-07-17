@@ -1,32 +1,79 @@
 #include <engine/interface.h>
 #include <engine/base.h>
+#include <engine/parsing.h>
 
 #include <set>
 #include <iostream>
+#include <string>
+#include <typeindex>
 #include <cmath>
-
-/* Components */
 
 struct Transform : Component
 {
     sf::Vector2f position = {0, 0};
     sf::Vector2f scale = {1, 1};
+
+    static Component *
+    deserialize(Parsing::configFile &dict)
+    {
+        auto t = new Transform;
+
+        t->position = Parsing::parseVector2<float>(dict, "position");
+        t->scale = Parsing::parseVector2<float>(dict, "scale");
+
+        return t;
+    }
 };
+
 struct Sprite : Component
 {
     std::string assetPath;
-    bool loaded = false;
     sf::Image image;
     sf::Texture texture;
     sf::Sprite sprite;
+
+    static Component *
+    deserialize(Parsing::configFile &dict)
+    {
+        auto spr = new Sprite;
+
+        spr->assetPath = Parsing::parseElement<std::string>(dict, "assetPath");
+
+        spr->image.loadFromFile(spr->assetPath);
+        spr->texture.loadFromImage(spr->image);
+        spr->sprite.setTexture(spr->texture);
+        sf::IntRect rect = { 0, 0
+                           , (int) spr->image.getSize().x
+                           , (int) spr->image.getSize().y };
+        spr->sprite.setTextureRect(rect);
+
+        return spr;
+    }
+
 };
 struct Camera : Component
 {
     sf::Vector2f scale = {1, 1};
+
+    static Component *
+    deserialize(Parsing::configFile &dict)
+    {
+        auto c = new Camera;
+
+        c->scale = Parsing::parseVector2<float>(dict, "scale");
+
+        return c;
+    }
 };
 struct Player : Component
 {
     float speed = .5;
+
+    static Component *
+    deserialize(Parsing::configFile &dict)
+    {
+        return new Player;
+    }
 };
 struct Collider : Component
 {
@@ -36,6 +83,18 @@ struct Collider : Component
     sf::Vector2f leftDownCorner = {0, 0};
     sf::Vector2f rightUpCorner = {0, 0};
     std::set<Entity> collisionList;
+
+    static Component *
+    deserialize(Parsing::configFile &dict)
+    {
+        auto c = new Collider;
+
+        c->deltaCenter = Parsing::parseVector2<float>(dict, "deltaCenter");
+        c->width = Parsing::parseElement<float>(dict, "width");
+        c->height = Parsing::parseElement<float>(dict, "height");
+
+        return c;
+    }
 };
 
 /* Systems */
@@ -49,18 +108,6 @@ render(GameState *state, Storage *storage, const Entity id)
 
     auto t = storage->getComponent<Transform>(id);
     auto spr = storage->getComponent<Sprite>(id);
-
-    if (!spr->loaded)
-    {
-        spr->image.loadFromFile(spr->assetPath);
-        spr->texture.loadFromImage(spr->image);
-        spr->sprite.setTexture(spr->texture);
-        sf::IntRect rect = { 0, 0
-                , (int) spr->image.getSize().x
-                , (int) spr->image.getSize().y };
-        spr->sprite.setTextureRect(rect);
-        spr->loaded = true;
-    }
 
     sf::Vector2f screenPos = { (t->position.x - camPos.x) * camera->scale.x
                              , (camPos.y - t->position.y) * camera->scale.y };
@@ -148,72 +195,21 @@ collision (GameState *state, Storage *storage, const Entity id)
         }
     }
 }
+
 /* ******* */
 
 // NOTE(guschin): Возможно, эту функцию можно генерировать автоматически.
 void
 initializeEngine(GameState *state, Storage *storage)
 {
-    storage->registerComponent<Transform>();
-    storage->registerComponent<Sprite>();
-    storage->registerComponent<Camera>();
-    storage->registerComponent<Player>();
-    storage->registerComponent<Collider>();
 
+    storage->registerComponent<Transform>("Transform");
+    storage->registerComponent<Sprite>("Sprite");
+    storage->registerComponent<Camera>("Camera");
+    storage->registerComponent<Player>("Player");
+    storage->registerComponent<Collider>("Collider");
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
     storage->registerSystem(updateCollider, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(collision, {TYPE(Collider), TYPE(Player)});
-
-}
-
-// NOTE(guschin): В этой сцене должна загружаться указанная сцена, но
-//  парсинга когфигов пока что нет, поэтому пока что так.
-void
-loadScene(const Config *config, const std::string& sceneName, GameState *state, Storage *storage)
-{
-    Entity e1 = storage->createEntity();
-    auto e1_t = storage->addComponent<Transform>(e1);
-    storage->addComponent<Player>(e1);
-    e1_t->scale = {0.1f, 0.1f};
-    auto spr = storage->addComponent<Sprite>(e1);
-    spr->assetPath = "assets/images/cube.jpg";
-
-    Entity e2 = storage->createEntity();
-    auto e2_t = storage->addComponent<Transform>(e2);
-    e2_t->scale = {0.15f, 0.15f};
-    auto spr2 = storage->addComponent<Sprite>(e2);
-    spr2->assetPath = "assets/images/cube.jpg";
-    e2_t->position = {130.f, 130.f};
-
-    for (Entity ent_id : storage->usedIds)
-    {
-        auto spr = storage->getComponent<Sprite>(ent_id);
-        if (spr != nullptr)
-        {
-            spr->image.loadFromFile(spr->assetPath);
-            spr->texture.loadFromImage(spr->image);
-            spr->sprite.setTexture(spr->texture);
-            sf::IntRect rect = { 0, 0
-                               , (int) spr->image.getSize().x
-                               , (int) spr->image.getSize().y };
-            spr->sprite.setTextureRect(rect);
-            spr->loaded = true;
-        }
-    }
-    auto c = storage->addComponent<Collider>(e1);
-    auto c2 = storage->addComponent<Collider>(e2);
-
-    c->deltaCenter = {-30.0, -30.0};
-    c2->deltaCenter = {1.0, 1.0};
-    c->width = (float) spr->image.getSize().x;
-    c->height = (float) spr->image.getSize().y;
-    c2->width = (float) spr2->image.getSize().x;
-    c2->height = (float) spr2->image.getSize().y;
-
-    Entity camera = storage->createEntity();
-    storage->addComponent<Transform>(camera);
-    auto cam = storage->addComponent<Camera>(camera);
-    cam->scale = {1, 1};
-    state->currentCamera = camera;
 }
