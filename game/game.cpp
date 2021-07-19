@@ -94,7 +94,7 @@ struct Collider : Component
     sf::Vector2f leftDownCorner = {0, 0};
     sf::Vector2f rightUpCorner = {0, 0};
     std::set<Entity> collisionList;
-    bool bl = false;
+    bool IsInteraction = false;
 
 
     static Component *
@@ -206,16 +206,15 @@ collision (GameState *state, Storage *storage, const Entity id)
         {
             auto lC2 = c2->leftDownCorner;
             auto rC2 = c2->rightUpCorner;
-            if (rC.x < lC2.x || lC.x > rC2.x || rC.y < lC2.y || lC.y > rC2.y)
+            if (rC.x < lC2.x || lC.x > rC2.x || rC.y < lC2.y || lC.y > rC2.y)  // Если объекты не накладываются
             {
                 c->collisionList.erase(id2);
                 c2->collisionList.erase(id);
-                c2->bl = false;
+                c2->IsInteraction = false;
                 continue;
             }
             c->collisionList.insert(id2);
             c2->collisionList.insert(id);
-//            c2->bl = true;
         }
     }
 }
@@ -224,10 +223,10 @@ void
 interactWithEnemy(GameState *state, Storage *storage, const Entity id)
 {
     auto coll = storage->getComponent<Collider>(id);
-    if (coll->collisionList.size() != 0 && !coll->bl)
+    if (coll->collisionList.size() != 0 && !coll->IsInteraction)
     {
         std::cout << "Interact with enemy\n";
-        coll->bl = true;
+        coll->IsInteraction = true;
     }
 }
 
@@ -235,10 +234,10 @@ void
 interactWithDoor(GameState *state, Storage *storage, const Entity id)
 {
     auto coll = storage->getComponent<Collider>(id);
-    if (coll->collisionList.size() != 0 && !coll->bl)
+    if (coll->collisionList.size() != 0 && !coll->IsInteraction)
     {
         std::cout << "Interact with door\n";
-        coll->bl = true;
+        coll->IsInteraction = true;
     }
 
 }
@@ -253,8 +252,8 @@ initializeEngine(GameState *state, Storage *storage)
     storage->registerComponent<Transform>("Transform");
     storage->registerComponent<Sprite>("Sprite");
     storage->registerComponent<Camera>("Camera");
-    storage->registerComponent<Player>("Player");
     storage->registerComponent<Collider>("Collider");
+    storage->registerComponent<Player>("Player");
     storage->registerComponent<Enemy>("Enemy");
     storage->registerComponent<Door>("Door");
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
