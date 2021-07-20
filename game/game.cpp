@@ -1,6 +1,7 @@
 #include <engine/interface.h>
 #include <engine/base.h>
 #include <engine/parsing.h>
+#include <engine/gui.h>
 
 #include <set>
 #include <iostream>
@@ -24,7 +25,6 @@ struct Transform : Component
         return t;
     }
 };
-
 struct Sprite : Component
 {
     std::string assetPath;
@@ -95,6 +95,10 @@ struct Collider : Component
 
         return c;
     }
+};
+struct GUI
+{
+    std::vector<Widget> widgets;
 };
 
 /* Systems */
