@@ -83,12 +83,8 @@ struct Collider : Component
     float height = 0;
     // NOTE(Roma): Разница между центром объекта и центром его коллайдера.
     sf::Vector2f deltaCenter = {0, 0};
-    // NOTE(Roma): Левый нижний и правый верхний углы, необходимые для обнаружения пересечения двух коллайдеров.
-    sf::Vector2f leftDownCorner = {0, 0};
-    sf::Vector2f rightUpCorner = {0, 0};
     // NOTE(Roma): Список всех объектов, с которыми пересекается данный.
     std::set<Entity> collisionList;
-    // NOTE(Roma): Разрешена ли коллизия: если нет, то объекты не смогут пересекаться.
     bool allowCollision = false;
     // NOTE(Roma): Глубина проникновения одного коллайдера в другой.
     float penetration = 0;
@@ -101,6 +97,7 @@ struct Collider : Component
         auto c = new Collider;
 
         c->deltaCenter = Parsing::parseVector2<float>(dict, "deltaCenter");
+        c->allowCollision = Parsing::parseElement<bool>(dict, "allowCollision");
         c->width = Parsing::parseElement<float>(dict, "width");
         c->height = Parsing::parseElement<float>(dict, "height");
 
@@ -109,8 +106,7 @@ struct Collider : Component
 };
 struct Physics : Component
 {
-    float speed = 0;
-    sf::Vector2f dirSpeed = {0, 0};
+    sf::Vector2f speed = {0, 0};
     sf::Vector2f position = {0, 0};
     sf::Vector2f activeAxes = {1, 1};
     const float gravityAcceleration = 0.05;
@@ -160,30 +156,24 @@ physics(GameState *state, Storage *storage, const Entity id)
 
     if (p->allowGravity && coll->normal.y == 1)
     {
-        p->speed = 0;
-        p->dirSpeed.y = 0;
+        p->speed.y = 0;
         p->forces["normal"] = {0, -1 * p->forces["gravity"].y};
     }
     p->evalResForce();
 
-    auto resForce = p->resForce;
+    auto resForce = p->resForce / p->mass;
 
-    float acceleration = std::sqrt(resForce.x * resForce.x + resForce.y * resForce.y) / p->mass;
-    if (acceleration != 0)
-    {
-        p->dirSpeed = resForce / acceleration;
-    }
-    p->speed += acceleration;
+    p->speed += resForce;
     auto t = storage->getComponent<Transform>(id);
 
     if (p->activeAxes.x == 1)
     {
-        t->position.x += p->speed * p->dirSpeed.x * state->deltaTime;
+        t->position.x += p->speed.x * state->deltaTime;
     }
 
     if (p->activeAxes.y == 1)
     {
-        t->position.y += p->speed * p->dirSpeed.y * state->deltaTime;
+        t->position.y += p->speed.y * state->deltaTime;
     }
 
 }

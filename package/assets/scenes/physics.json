@@ -15,7 +15,8 @@
         "type": "Collider",
         "deltaCenter": [0, 0],
         "width": 495.0,
-        "height": 90.0
+        "height": 90.0,
+        "allowCollision": false
       },
       {
         "type": "Physics",
@@ -46,7 +47,8 @@
         "type": "Collider",
         "deltaCenter": [0, 0],
         "width": 90.0,
-        "height": 90.0
+        "height": 90.0,
+        "allowCollision": false
       },
       {
         "type": "Sprite",
