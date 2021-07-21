@@ -159,6 +159,10 @@ physics(GameState *state, Storage *storage, const Entity id)
         p->speed.y = 0;
         p->forces["normal"] = {0, -1 * p->forces["gravity"].y};
     }
+    if (coll->normal.y == -1)
+    {
+        p->speed.y = 0;
+    }
     p->evalResForce();
 
     auto resForce = p->resForce / p->mass;
