@@ -109,7 +109,7 @@ struct Physics : Component
     sf::Vector2f speed = {0, 0};
     sf::Vector2f position = {0, 0};
     sf::Vector2f activeAxes = {1, 1};
-    const float gravityAcceleration = 0.1;
+    const float gravityAcceleration = 0.2;
     float mass = 1;
 
     bool allowGravity = true;
@@ -234,7 +234,7 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
     if (state->axes["jump"] == 1 && c->normal.y == 1)
     {
-        p->speed.y += 300.f;
+        p->speed.y += 500.f;
     }
 
     // Нормализуем верктор move
