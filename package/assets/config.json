@@ -8,7 +8,7 @@
 	],
 	"scene": [
 		{
-			"default": "assets/scenes/physics.json"
+			"default": "assets/scenes/sound.json"
 		}
 	],
 	"input": [
