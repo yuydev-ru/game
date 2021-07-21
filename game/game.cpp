@@ -1,6 +1,6 @@
+#include <SFML/Audio.hpp>
 #include <engine/interface.h>
 #include <engine/base.h>
-#include <engine/parsing.h>
 
 #include <set>
 #include <iostream>
@@ -97,6 +97,50 @@ struct Collider : Component
     }
 };
 
+struct Sound : Component
+{
+    // TODO (vincento): Добавить вектор звуков (для их удаления после воспроизв-я). Лимит в SFML - 256.
+
+    std::string name;
+    std::string assetPath;
+    float volume;
+    bool isLooped;
+    sf::SoundBuffer buffer;
+    sf::Sound sound;
+    bool isLoaded = false;
+
+    static Component *
+    deserialize(Parsing::configFile &dict)
+    {
+        auto s = new Sound;
+        s->name = Parsing::parseElement<std::string>(dict, "name");
+        s->assetPath = Parsing::parseElement<std::string>(dict, "assetPath");
+        s->volume =  Parsing::parseElement<float>(dict, "volume");
+        s->isLooped = Parsing::parseElement<bool>(dict, "isLooped");
+        if (s->buffer.loadFromFile(s->assetPath))
+        {
+            s->isLoaded = true;
+            s->sound.setBuffer(s->buffer);
+            s->sound.setLoop(s->isLooped);
+            s->sound.setVolume(s->volume);
+            std::cout <<"Sound registered, assetPath: " << s->assetPath << "\n";
+        }
+        else
+        {
+            std::cout << "ERROR: Sound doesn't load!\n";
+        }
+        return s;
+    }
+    void
+    play()
+    {
+        if (this->isLoaded)
+        {
+            this->sound.play();
+        }
+    }
+};
+
 /* Systems */
 
 void
@@ -149,7 +193,6 @@ updateCollider(GameState *state, Storage *storage, const Entity id)
         }
     }
 }
-
 void
 movePlayer(GameState *state, Storage *storage, const Entity id)
 {
@@ -195,8 +238,26 @@ collision (GameState *state, Storage *storage, const Entity id)
         }
     }
 }
-
 /* ******* */
+void soundTest(GameState *state, Storage *storage, const Entity id)
+{
+    if (state->axes["vertical"] > 0.0f)
+    {
+        auto snd = storage->getComponent<Sound>(id);
+        if (snd->isLoaded && snd->name == "music")
+        {
+            snd->sound.play();
+        }
+    }
+    if (state->axes["interact"] > 0.0f)
+    {
+        auto snd = storage->getComponent<Sound>(id);
+        if (snd->isLoaded && snd->name == "sound")
+        {
+            snd->sound.play();
+        }
+    }
+}
 
 // NOTE(guschin): Возможно, эту функцию можно генерировать автоматически.
 void
@@ -208,8 +269,10 @@ initializeEngine(GameState *state, Storage *storage)
     storage->registerComponent<Camera>("Camera");
     storage->registerComponent<Player>("Player");
     storage->registerComponent<Collider>("Collider");
+    storage->registerComponent<Sound>("Sound");
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
     storage->registerSystem(updateCollider, {TYPE(Transform), TYPE(Sprite)});
     storage->registerSystem(collision, {TYPE(Collider), TYPE(Player)});
+    storage->registerSystem(soundTest,{TYPE(Sound)});
 }
