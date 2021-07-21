@@ -240,6 +240,10 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     {
         p->speed.y += 400.f;
     }
+    if (c->normal.y != 1)
+    {
+        move.y = 0;
+    }
 
     // Нормализуем верктор move
     float length = std::sqrt((move.x * move.x) + (move.y * move.y));
