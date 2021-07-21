@@ -16,7 +16,6 @@ ifneq ($(OS),Windows_NT)
 endif
 
 SRC = game/game.cpp
-OBJ = $(BUILD_DIR)/engine.o
 
 INCLUDE_DIR = "include"
 LIB_DIR = "lib"
@@ -25,11 +24,12 @@ PACKAGE_DIR = "package"
 
 
 all: game
-game: engine.o logger.o include/engine/interface.h $(SRC)
-	$(CC) $(CFLAGS) -I./$(INCLUDE_DIR) game/game.cpp $(BUILD_DIR)/engine.o $(BUILD_DIR)/logger.o -L./$(LIB_DIR) -lsfml-window -lsfml-graphics -lsfml-system -o $(PACKAGE_DIR)/game.exe
 
+game: OBJ=$(wildcard build/*.o)
+game: engine logger.o include/engine/interface.h $(SRC)
+	$(CC) $(CFLAGS) -I./$(INCLUDE_DIR) game/game.cpp $(OBJ) -L./$(LIB_DIR) -lsfml-window -lsfml-graphics -lsfml-system -o $(PACKAGE_DIR)/game.exe
 
-engine.o: include/engine/base.h include/engine/base.cpp include/engine/interface.h
+engine:
 	$(MAKE) -C include/engine PREFIX=../..
 
 logger.o: include/logger/logger.h include/logger/logger.cpp
