@@ -109,7 +109,7 @@ struct Physics : Component
     sf::Vector2f speed = {0, 0};
     sf::Vector2f position = {0, 0};
     sf::Vector2f activeAxes = {1, 1};
-    const float gravityAcceleration = 0.2;
+    const float gravityAcceleration = 500;
     float mass = 1;
 
     bool allowGravity = true;
@@ -163,7 +163,7 @@ physics(GameState *state, Storage *storage, const Entity id)
 
     auto resForce = p->resForce / p->mass;
 
-    p->speed += resForce;
+    p->speed += resForce * state->deltaTime;
     auto t = storage->getComponent<Transform>(id);
 
     if (p->activeAxes.x == 1)
@@ -215,7 +215,7 @@ pushOut(GameState *state, Storage *storage, const Entity id)
     auto p = storage->getComponent<Physics>(id);
     if (coll != nullptr && !coll->collisionList.empty() && !coll->allowCollision)
     {
-        //std::cout << coll->collisionList.size() << "\n";
+
         auto t = storage->getComponent<Transform>(id);
         sf::Vector2f move = coll->normal * coll->penetration;
         move.x *= p->activeAxes.x;
@@ -234,7 +234,7 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
     if (state->axes["jump"] == 1 && c->normal.y == 1)
     {
-        p->speed.y += 500.f;
+        p->speed.y += 400.f;
     }
 
     // Нормализуем верктор move
