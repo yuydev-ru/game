@@ -51,6 +51,7 @@ struct Sprite : Component
     }
 
 };
+
 struct Camera : Component
 {
     sf::Vector2f scale = {1, 1};
@@ -86,6 +87,7 @@ struct Player : Component
         return new Player;
     }
 };
+
 struct Collider : Component
 {
     float width = 0;
@@ -116,7 +118,7 @@ struct Door : Component
     static Component *
     deserialize(Parsing::configFile &dict)
     {
-        return new Player;
+        return new Door;
     }
 };
 
