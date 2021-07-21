@@ -109,7 +109,7 @@ struct Physics : Component
     sf::Vector2f speed = {0, 0};
     sf::Vector2f position = {0, 0};
     sf::Vector2f activeAxes = {1, 1};
-    const float gravityAcceleration = 0.05;
+    const float gravityAcceleration = 0.1;
     float mass = 1;
 
     bool allowGravity = true;
@@ -215,6 +215,7 @@ pushOut(GameState *state, Storage *storage, const Entity id)
     auto p = storage->getComponent<Physics>(id);
     if (coll != nullptr && !coll->collisionList.empty() && !coll->allowCollision)
     {
+        //std::cout << coll->collisionList.size() << "\n";
         auto t = storage->getComponent<Transform>(id);
         sf::Vector2f move = coll->normal * coll->penetration;
         move.x *= p->activeAxes.x;
@@ -227,8 +228,14 @@ void
 movePlayer(GameState *state, Storage *storage, const Entity id)
 {
     auto t = storage->getComponent<Transform>(id);
+    auto c = storage->getComponent<Collider>(id);
+    auto p = storage->getComponent<Physics>(id);
 
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
+    if (state->axes["jump"] == 1 && c->normal.y == 1)
+    {
+        p->speed.y += 300.f;
+    }
 
     // Нормализуем верктор move
     float length = std::sqrt((move.x * move.x) + (move.y * move.y));
@@ -294,7 +301,7 @@ collision (GameState *state, Storage *storage, const Entity id)
                         c2->penetration = overlapX;
                         c->collisionList.insert(id2);
                         c2->collisionList.insert(id);
-                        continue;
+                        break;
                     }
                     else
                     {
@@ -312,7 +319,7 @@ collision (GameState *state, Storage *storage, const Entity id)
                         c2->penetration = overlapY;
                         c->collisionList.insert(id2);
                         c2->collisionList.insert(id);
-                        continue;
+                        break;
                     }
                 }
             }
@@ -340,7 +347,7 @@ initializeEngine(GameState *state, Storage *storage)
     storage->registerComponent<Physics>("Physics");
 
     storage->registerSystem(render, {TYPE(Transform), TYPE(Sprite)});
-    storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player)});
+    storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player), TYPE(Collider), TYPE(Physics)});
     storage->registerSystem(collision, {TYPE(Collider), TYPE(Player)});
     storage->registerSystem(pushOut, {TYPE(Collider), TYPE(Physics), TYPE(Transform)});
     storage->registerSystem(physics, {TYPE(Collider), TYPE(Physics), TYPE(Transform)});

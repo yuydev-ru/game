@@ -63,6 +63,30 @@
         "allowGravity": true,
         "activeAxes": [1.0, 1.0]
       }
+    ],
+    [
+      {
+        "type": "Transform",
+        "position": [130, 0],
+        "scale": [0.2, 0.07]
+      },
+      {
+        "type": "Sprite",
+        "assetPath": "assets/images/square.png"
+      },
+      {
+        "type": "Collider",
+        "deltaCenter": [0, 0],
+        "width": 180.0,
+        "height": 63.0,
+        "allowCollision": false
+      },
+      {
+        "type": "Physics",
+        "mass": 1.0,
+        "allowGravity": false,
+        "activeAxes": [0, 0]
+      }
     ]
   ]
 }
