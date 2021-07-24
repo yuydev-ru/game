@@ -1,6 +1,6 @@
 #include <engine/interface.h>
 #include <engine/base.h>
-#include <engine/parsing.h>
+#include <engine/parser.h>
 #include <engine/components.h>
 
 #include <set>
@@ -14,7 +14,7 @@ struct Player : Component
     float speed = 200;
 
     static Component *
-    deserialize(Parsing::configFile &dict)
+    deserialize(Parser &parser)
     {
         return new Player;
     }
@@ -29,12 +29,13 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     auto c = storage->getComponent<Collider>(id);
     auto p = storage->getComponent<Physics>(id);
     auto s = storage->getComponent<Sound>(id);
+
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
     if (state->axes["jump"] == 1 && c->normal.y == 1)
     {
         p->speed.y += 400.f;
 
-        s->sound.play();
+        s->play();
     }
     if (c->normal.y != 1)
     {
@@ -54,17 +55,6 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     t->position += move * state->deltaTime;
 }
 
-void
-setupSound(GameState *state, Storage *storage, const Entity id)
-{
-    //TODO: Эта функция должна вызываться 1 раз вместо постоянного вызова в game loop.
-    auto snd = storage->getComponent<Sound>(id);
-    if (snd->playOnStart == true)
-    {
-        snd->play();
-        snd->playOnStart = false;
-    }
-}
 /* ******* */
 
 // NOTE(guschin): Возможно, эту функцию можно генерировать автоматически.
