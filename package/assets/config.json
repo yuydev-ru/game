@@ -1,62 +1,73 @@
 {
-	"window": [
-		{
-			"width": 480,
-			"height": 480,
-			"title": "Engine"
-		}
-	],
-	"scene": [
-		{
-			"default": "assets/scenes/physics.json"
-		}
-	],
-	"input": [
-		{
+	"window": {
+		"width": 480,
+		"height": 480,
+		"title": "Engine"
+	},
+	"scene": {
+		"default": "assets/scenes/physics.json"
+	},
+	"input": {
 			"keys":[
+				["up","W"],
+				["down","S"],
+				["left","A"],
+				["right","D"],
+				["interact","E"],
+				["jump","Space"]
+			],
+			"oppositeKeys": [
+				["up","down"],
+				["down","up"],
+				["right","left"],
+				["left","right"]
+			],
+			"axisData": [
 				{
 					"key": "up",
-					"button":"W"
+					"axis": "vertical",
+					"axisType": "hold",
+					"value": 1.0
 				},
 				{
 					"key": "down",
-					"button":"S"
+					"axis": "vertical",
+					"axisType": "hold",
+					"value": -1.0
 				},
 				{
 					"key": "left",
-					"button":"A"
+					"axis": "horizontal",
+					"axisType": "hold",
+					"value": -1.0
 				},
 				{
 					"key": "right",
-					"button":"D"
+					"axis": "horizontal",
+					"axisType": "hold",
+					"value": 1.0
 				},
 				{
 					"key": "interact",
-					"button":"E"
+					"axis": "interact",
+					"axisType": "push",
+					"value": 1.0
 				},
 				{
 					"key": "jump",
-					"button":"Space"
+					"axis": "jump",
+					"axisType": "hold",
+					"value": 1.0
 				}
 			],
-			"oppositeKeys":[
-				{
-					"key": "up",
-					"opposite":"down"
-				},
-				{
-					"key": "down",
-					"opposite":"up"
-				},
-				{
-					"key": "right",
-					"opposite":"left"
-				},
-				{
-					"key": "left",
-					"opposite":"right"
-				}
+			"axes": [
+				["horizontal",0.0],
+				["vertical",0.0],
+				["jump",0.0],
+				["interact",0.0]
 			]
-		}
-	]
+		},
+	"debug": {
+		"logLevel": 2
+	}
 }
