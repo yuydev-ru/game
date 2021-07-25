@@ -1,0 +1,70 @@
+{
+    "currentCamera": "camera",
+    "entities": [
+        [
+            {
+                "type": "Transform",
+                "position": [0, 0],
+                "scale": [0.15, 0.15]
+            },
+            {
+                "type": "Player"
+            },
+            {
+                "type": "Sprite",
+                "assetPath": "assets/images/square.png"
+            },
+            {
+                "type": "Collider",
+                "deltaCenter": [1.0, 1.0],
+                "width": 135.0,
+                "height": 135.0
+            },
+            {
+                "type": "Sound",
+                "name": "sound",
+                "assetPath": "assets/sound.wav",
+                "volume": 50.0,
+                "isLooped": false
+            }
+        ],
+        [
+            {
+                "type": "Transform",
+                "position": [0, 0],
+                "scale": [1, 1]
+            },
+            {
+                "type": "Camera",
+                "tags": ["mainCamera"],
+                "scale": [1, 1]
+            }
+        ],
+		[
+            {
+                "type": "Transform",
+                "position": [130.0, 130.0],
+                "scale": [0.15, 0.15]
+            },
+            {
+                "type": "Collider",
+				"deltaCenter": [-30.0, -30.0],
+				"width": 900.0,
+				"height": 900.0
+            },
+            {
+                "type": "Sprite",
+                "assetPath": "assets/images/square.png"
+            }
+        ],
+        [
+            {
+                "type": "Sound",
+                "name": "music",
+                "assetPath": "assets/music.wav",
+                "volume": 100.0,
+                "isLooped": true
+            }
+        ]
+    ]
+}

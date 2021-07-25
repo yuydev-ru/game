@@ -1,6 +1,7 @@
+#include <SFML/Audio.hpp>
 #include <engine/interface.h>
 #include <engine/base.h>
-#include <engine/parsing.h>
+#include <engine/parser.h>
 #include <engine/components.h>
 
 #include <typeindex>
@@ -13,13 +14,11 @@ struct Player : Component
     float speed = 200;
 
     static Component *
-    deserialize(Parsing::configFile &dict)
+    deserialize(Parser &parser)
     {
         return new Player;
     }
 };
-
-/* Systems */
 
 void
 movePlayer(GameState *state, Storage *storage, const Entity id)
@@ -27,11 +26,13 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     auto t = storage->getComponent<Transform>(id);
     auto c = storage->getComponent<Collider>(id);
     auto p = storage->getComponent<Physics>(id);
+    auto s = storage->getComponent<Sound>(id);
 
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
     if (state->axes["jump"] == 1 && c->normal.y == 1)
     {
         p->speed.y += 400.f;
+        s->play();
     }
     if (c->normal.y != 1)
     {
