@@ -27,7 +27,7 @@ all: game
 
 game: OBJ=$(wildcard build/*.o)
 game: engine logger.o include/engine/interface.h $(SRC)
-	$(CC) $(CFLAGS) -I./$(INCLUDE_DIR) game/game.cpp $(OBJ) -L./$(LIB_DIR) -lsfml-window -lsfml-graphics -lsfml-audio -lsfml-system -o $(PACKAGE_DIR)/game.exe
+	$(CC) $(CFLAGS) -I./$(INCLUDE_DIR) game/game.cpp $(OBJ) -L./$(LIB_DIR) -lsfml-window -lsfml-graphics -lsfml-system -o $(PACKAGE_DIR)/game.exe
 
 engine:
 	$(MAKE) -C include/engine PREFIX=../..
