@@ -28,14 +28,11 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     auto t = storage->getComponent<Transform>(id);
     auto c = storage->getComponent<Collider>(id);
     auto p = storage->getComponent<Physics>(id);
-    auto s = storage->getComponent<Sound>(id);
 
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
     if (state->axes["jump"] == 1 && c->normal.y == 1)
     {
         p->speed.y += 400.f;
-
-        s->play();
     }
     if (c->normal.y != 1)
     {
@@ -63,5 +60,4 @@ initializeEngine(GameState *state, Storage *storage)
 {
     storage->registerComponent<Player>("Player");
     storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player), TYPE(Collider), TYPE(Physics)});
-    storage->registerSystem(setupSound,{TYPE(Sound)});
 }
