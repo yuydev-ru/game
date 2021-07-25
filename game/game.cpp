@@ -1,10 +1,8 @@
 #include <engine/interface.h>
 #include <engine/base.h>
 #include <engine/parsing.h>
-#include <engine/gui.h>
 #include <engine/components.h>
 
-#include <set>
 #include <typeindex>
 #include <cmath>
 
