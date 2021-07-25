@@ -8,7 +8,7 @@
 	],
 	"scene": [
 		{
-			"default": "assets/scenes/menu.json"
+			"default": "assets/scenes/physics.json"
 		}
 	],
 	"input": [
