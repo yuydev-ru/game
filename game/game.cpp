@@ -1,7 +1,7 @@
 #include <SFML/Audio.hpp>
 #include <engine/interface.h>
 #include <engine/base.h>
-#include <engine/parsing.h>
+#include <engine/parser.h>
 #include <engine/components.h>
 
 #include <set>
@@ -15,7 +15,7 @@ struct Player : Component
     float speed = 200;
 
     static Component *
-    deserialize(Parsing::configFile &dict)
+    deserialize(Parser &parser)
     {
         return new Player;
     }
