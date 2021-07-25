@@ -19,6 +19,13 @@
                 "deltaCenter": [1.0, 1.0],
                 "width": 135.0,
                 "height": 135.0
+            },
+            {
+                "type": "Sound",
+                "name": "sound",
+                "assetPath": "assets/sound.wav",
+                "volume": 50.0,
+                "isLooped": false
             }
         ],
         [
@@ -48,6 +55,15 @@
             {
                 "type": "Sprite",
                 "assetPath": "assets/images/square.png"
+            }
+        ],
+        [
+            {
+                "type": "Sound",
+                "name": "music",
+                "assetPath": "assets/music.wav",
+                "volume": 100.0,
+                "isLooped": true
             }
         ]
     ]

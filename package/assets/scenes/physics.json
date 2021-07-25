@@ -58,6 +58,14 @@
         "type": "Player"
       },
       {
+        "type": "Sound",
+        "name": "sound",
+        "assetPath": "assets/sound.wav",
+        "volume": 50.0,
+        "isLooped": false,
+        "playOnStart": false
+      },
+      {
         "type": "Physics",
         "mass": 1.0,
         "allowGravity": true,
@@ -86,6 +94,16 @@
         "mass": 1.0,
         "allowGravity": false,
         "activeAxes": [0, 0]
+      }
+    ],
+    [
+      {
+        "type": "Sound",
+        "name": "music",
+        "assetPath": "assets/music.wav",
+        "volume": 100.0,
+        "isLooped": true,
+        "playOnStart": true
       }
     ]
   ]
