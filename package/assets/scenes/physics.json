@@ -55,11 +55,24 @@
         "assetPath": null
       },
       {
-        "type": "Animation",
-        "assetPath": "assets/images/idle.png",
-        "numberOfFrames": 11,
-        "gridSize": [4, 3],
-        "fps": 10
+        "type": "AnimationController",
+        "defaultAnimation": "idle",
+        "animations": [
+          {
+            "name": "idle",
+            "assetPath": "assets/images/idle.png",
+            "numberOfFrames": 11,
+            "gridSize": [4, 3],
+            "fps": 10
+          },
+          {
+            "name": "jump",
+            "assetPath": "assets/images/jump.png",
+            "numberOfFrames": 41,
+            "gridSize": [7, 6],
+            "fps": 30
+          }
+        ]
       },
       {
         "type": "Player"
