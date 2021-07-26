@@ -33,8 +33,7 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
     if (state->axes["jump"] == 1 && c->normal.y == 1)
     {
-        p->speed.y += 400.f;
-        s->play();
+        p->speed.y += 600.f;
     }
     if (c->normal.y != 1)
     {
