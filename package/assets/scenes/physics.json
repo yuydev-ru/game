@@ -56,21 +56,28 @@
       },
       {
         "type": "AnimationController",
-        "defaultAnimation": "idle",
+        "defaultAnimation": "run-right",
         "animations": [
           {
             "name": "idle",
             "assetPath": "assets/images/idle.png",
             "numberOfFrames": 11,
             "gridSize": [4, 3],
-            "fps": 10
+            "fps": 30
           },
           {
-            "name": "jump",
-            "assetPath": "assets/images/jump.png",
-            "numberOfFrames": 41,
+            "name": "run-right",
+            "assetPath": "assets/images/run-right.png",
+            "numberOfFrames": 37,
             "gridSize": [7, 6],
-            "fps": 30
+            "fps": 60
+          },
+          {
+            "name": "run-left",
+            "assetPath": "assets/images/run-left.png",
+            "numberOfFrames": 37,
+            "gridSize": [7, 6],
+            "fps": 60
           }
         ]
       },

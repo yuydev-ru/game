@@ -28,6 +28,7 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     auto c = storage->getComponent<Collider>(id);
     auto p = storage->getComponent<Physics>(id);
     auto s = storage->getComponent<Sound>(id);
+    auto anim = storage->getComponent<AnimationController>(id);
 
     sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
     if (state->axes["jump"] == 1 && c->normal.y == 1)
@@ -50,6 +51,29 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
     move.x *= storage->getComponent<Player>(id)->speed;
     move.y *= storage->getComponent<Player>(id)->speed;
 
+    if (move.x == 0)
+    {
+        if (anim->currentAnimation->name != "idle")
+        {
+            anim->setAnimation("idle");
+        }
+    }
+
+    if (move.x > 0)
+    {
+        if (anim->currentAnimation->name != "run-right")
+        {
+            anim->setAnimation("run-right");
+        }
+    }
+    if (move.x < 0)
+    {
+        if (anim->currentAnimation->name != "run-left")
+        {
+            anim->setAnimation("run-left");
+        }
+    }
+
     t->position += move * state->deltaTime;
 }
 
@@ -60,5 +84,5 @@ void
 initializeEngine(GameState *state, Storage *storage)
 {
     storage->registerComponent<Player>("Player");
-    storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player), TYPE(Collider), TYPE(Physics)});
+    storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player), TYPE(Collider), TYPE(Physics), TYPE(AnimationController)});
 }
