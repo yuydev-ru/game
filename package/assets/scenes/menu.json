@@ -1,16 +1,21 @@
 {
-"currentCamera": "camera",
 "entities": [
     [
         {
-            "type": "Transform",
-            "position": [0, 0],
-            "scale": [1, 1]
-        },
-        {
-            "type": "Camera",
-            "tags": ["mainCamera"],
-            "scale": [1, 1]
+            "type": "Gui",
+            "widgets": [
+                {
+                    "type": "Button",
+                    "func": "button_action",
+                    "position": [100, 100],
+                    "imageStates": [
+                        ["normal", "assets/button/normal.png"],
+                        ["hovered", "assets/button/hovered.png"],
+                        ["clicked", "assets/button/clicked.png"]
+                    ],
+                    "text": "Play!"
+                }
+            ]
         }
     ]
 ]

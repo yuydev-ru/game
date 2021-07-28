@@ -5,10 +5,10 @@
 		"title": "Engine"
 	},
 	"scene": {
-		"default": "assets/scenes/physics.json"
+		"default": "assets/scenes/menu.json"
 	},
 	"input": {
-			"keys":[
+			"keys": [
 				["up","W"],
 				["down","S"],
 				["left","A"],
