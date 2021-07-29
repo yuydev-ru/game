@@ -13,7 +13,10 @@
                         ["hovered", "assets/button/hovered.png"],
                         ["clicked", "assets/button/clicked.png"]
                     ],
-                    "text": "Play!"
+                    "text": "Play!",
+                    "textSize": 96,
+                    "textColor": [255, 100, 100, 255],
+                    "fontPath": "assets/fonts/CabinSketch-Regular.ttf"
                 }
             ]
         }
