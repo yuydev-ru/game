@@ -5,16 +5,17 @@
 		"title": "Engine"
 	},
 	"scene": {
-		"default": "assets/scenes/physics.json"
+		"default": "assets/scenes/newobj.json"
 	},
 	"input": {
 			"keys":[
-				["up","W"],
-				["down","S"],
-				["left","A"],
-				["right","D"],
-				["interact","E"],
-				["jump","Space"]
+				["up", "W"],
+				["down", "S"],
+				["left", "A"],
+				["right", "D"],
+				["interact", "E"],
+				["jump", "Space"],
+				["attack", "X"]
 			],
 			"oppositeKeys": [
 				["up","down"],
@@ -58,13 +59,20 @@
 					"axis": "jump",
 					"axisType": "hold",
 					"value": 1.0
+				},
+				{
+					"key": "attack",
+					"axis": "attack",
+					"axisType": "push",
+					"value": 1.0
 				}
 			],
 			"axes": [
-				["horizontal",0.0],
-				["vertical",0.0],
-				["jump",0.0],
-				["interact",0.0]
+				["horizontal", 0.0],
+				["vertical", 0.0],
+				["jump", 0.0],
+				["interact", 0.0],
+				["attack", 0.0]
 			]
 		},
 	"debug": {
