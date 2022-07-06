@@ -1,4 +1,4 @@
-#include <SFML/Audio.hpp>
+#include <glm/vec2.hpp>
 
 #include <set>
 #include <typeindex>
@@ -11,26 +11,26 @@
 
 /* Components */
 
-struct Player : Component
+struct Player : herb::Component
 {
     float speed = 200;
 
-    static Component *
-    deserialize(Parser &parser)
+    static herb::Component *
+    deserialize(herb::Parser &parser)
     {
         return new Player;
     }
 };
 
 void
-movePlayer(GameState *state, Storage *storage, const Entity id)
+movePlayer(herb::GameState *state, herb::Storage *storage, const herb::Entity id)
 {
-    auto t = storage->getComponent<Transform>(id);
-    auto c = storage->getComponent<Collider>(id);
-    auto p = storage->getComponent<Physics>(id);
-    auto s = storage->getComponent<Sound>(id);
+    auto t = storage->getComponent<herb::Transform>(id);
+    auto c = storage->getComponent<herb::Collider>(id);
+    auto p = storage->getComponent<herb::Physics>(id);
+    auto s = storage->getComponent<herb::Sound>(id);
 
-    sf::Vector2f move = {state->axes["horizontal"], state->axes["vertical"]};
+    glm::vec2 move = {state->axes["horizontal"], state->axes["vertical"]};
     if (state->axes["jump"] == 1 && c->normal.y == 1)
     {
         p->speed.y += 400.f;
@@ -58,8 +58,8 @@ movePlayer(GameState *state, Storage *storage, const Entity id)
 
 // NOTE(guschin): Возможно, эту функцию можно генерировать автоматически.
 void
-initializeEngine(GameState *state, Storage *storage)
+initializeEngine(herb::GameState *state, herb::Storage *storage)
 {
     storage->registerComponent<Player>("Player");
-    storage->registerSystem(movePlayer, {TYPE(Transform), TYPE(Player), TYPE(Collider), TYPE(Physics)});
+    storage->registerSystem(movePlayer, {TYPE(herb::Transform), TYPE(Player), TYPE(herb::Collider), TYPE(herb::Physics)});
 }

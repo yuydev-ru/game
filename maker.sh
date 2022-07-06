@@ -2,9 +2,7 @@
 
 build() {
     set -o xtrace
-	cmake -DSFML_USE_SYSTEM_DEPS=True \
-          -DBUILD_SHARED_LIBS=False \
-          -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+	cmake -DBUILD_SHARED_LIBS=False \
           -G Ninja -S . -B ./Build \
     && ninja -C ./Build
 }
