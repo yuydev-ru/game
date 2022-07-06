@@ -1,9 +1,6 @@
 [submodule "Dependencies/logger"]
 	path = Dependencies/logger
 	url = git@github.com:yuydev-ru/logger.git
-[submodule "Dependencies/engine"]
-	path = Dependencies/engine
-	url = git@github.com:yuydev-ru/engine.git
 [submodule "Dependencies/json"]
 	path = Dependencies/json
 	url = git@github.com:yuydev-ru/json.git
@@ -13,3 +10,6 @@
 [submodule "Dependencies/glm"]
 	path = Dependencies/glm
 	url = git@github.com:yuydev-ru/glm.git
+[submodule "Dependencies/HerbEngine"]
+	path = Dependencies/HerbEngine
+	url = git@github.com:yuydev-ru/HerbEngine.git
