@@ -14,13 +14,13 @@
 				["left","A"],
 				["right","D"],
 				["interact","E"],
-				["jump","Space"]
+				["jump","SPACE"]
 			],
 			"oppositeKeys": [
-				["up","down"],
-				["down","up"],
-				["right","left"],
-				["left","right"]
+				["up","DOWN"],
+				["down","UP"],
+				["right","LEFT"],
+				["left","RIGHT"]
 			],
 			"axisData": [
 				{

@@ -7,6 +7,9 @@
 [submodule "Dependencies/json"]
 	path = Dependencies/json
 	url = git@github.com:yuydev-ru/json.git
-[submodule "Dependencies/SFML"]
-	path = Dependencies/SFML
-	url = git@github.com:yuydev-ru/SFML.git
+[submodule "Dependencies/raylib"]
+	path = Dependencies/raylib
+	url = git@github.com:yuydev-ru/raylib.git
+[submodule "Dependencies/glm"]
+	path = Dependencies/glm
+	url = git@github.com:yuydev-ru/glm.git
