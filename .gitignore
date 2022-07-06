@@ -1,8 +1,8 @@
-.idea
+.*
 lib
 build
+Build
 package/*.dll
 package/*.exe
 package/*.out
 include
-*.DS_Store

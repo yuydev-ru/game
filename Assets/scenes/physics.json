@@ -9,7 +9,7 @@
       },
       {
         "type": "Sprite",
-        "assetPath": "assets/images/square.png"
+        "assetPath": "Assets/images/square.png"
       },
       {
         "type": "Collider",
@@ -52,7 +52,7 @@
       },
       {
         "type": "Sprite",
-        "assetPath": "assets/images/square.png"
+        "assetPath": "Assets/images/square.png"
       },
       {
         "type": "Player"
@@ -60,7 +60,7 @@
       {
         "type": "Sound",
         "name": "sound",
-        "assetPath": "assets/sound.wav",
+        "assetPath": "Assets/sound.wav",
         "volume": 50.0,
         "isLooped": false,
         "playOnStart": false
@@ -80,7 +80,7 @@
       },
       {
         "type": "Sprite",
-        "assetPath": "assets/images/square.png"
+        "assetPath": "Assets/images/square.png"
       },
       {
         "type": "Collider",
@@ -100,7 +100,7 @@
       {
         "type": "Sound",
         "name": "music",
-        "assetPath": "assets/music.wav",
+        "assetPath": "Assets/music.wav",
         "volume": 100.0,
         "isLooped": true,
         "playOnStart": true

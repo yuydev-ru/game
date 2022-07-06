@@ -1,0 +1,12 @@
+[submodule "Dependencies/logger"]
+	path = Dependencies/logger
+	url = git@github.com:yuydev-ru/logger.git
+[submodule "Dependencies/engine"]
+	path = Dependencies/engine
+	url = git@github.com:yuydev-ru/engine.git
+[submodule "Dependencies/json"]
+	path = Dependencies/json
+	url = git@github.com:yuydev-ru/json.git
+[submodule "Dependencies/SFML"]
+	path = Dependencies/SFML
+	url = git@github.com:yuydev-ru/SFML.git
