@@ -5,7 +5,7 @@
 		"title": "Engine"
 	},
 	"scene": {
-		"default": "assets/scenes/physics.json"
+		"default": "Assets/scenes/physics.json"
 	},
 	"input": {
 			"keys":[

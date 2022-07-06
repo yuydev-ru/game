@@ -1,12 +1,13 @@
 #include <SFML/Audio.hpp>
-#include <engine/interface.h>
-#include <engine/base.h>
-#include <engine/parser.h>
-#include <engine/components.h>
 
 #include <set>
 #include <typeindex>
 #include <cmath>
+
+#include <engine/interface.h>
+#include <engine/base.h>
+#include <engine/parser.h>
+#include <engine/components.h>
 
 /* Components */
 

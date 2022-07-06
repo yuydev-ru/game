@@ -12,7 +12,7 @@
             },
             {
                 "type": "Sprite",
-                "assetPath": "assets/images/square.png"
+                "assetPath": "Assets/images/square.png"
             },
             {
                 "type": "Collider",
@@ -23,7 +23,7 @@
             {
                 "type": "Sound",
                 "name": "sound",
-                "assetPath": "assets/sound.wav",
+                "assetPath": "Assets/sound.wav",
                 "volume": 50.0,
                 "isLooped": false
             }
@@ -54,14 +54,14 @@
             },
             {
                 "type": "Sprite",
-                "assetPath": "assets/images/square.png"
+                "assetPath": "Assets/images/square.png"
             }
         ],
         [
             {
                 "type": "Sound",
                 "name": "music",
-                "assetPath": "assets/music.wav",
+                "assetPath": "Assets/music.wav",
                 "volume": 100.0,
                 "isLooped": true
             }
